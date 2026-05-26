@@ -35,27 +35,47 @@ class PlannerApp:
 
         self.create_task_btn = tk.Button(frame, text="Create Task",
                                           command=self.create_task,
-                                          width=15, height=3)
-        self.create_task_btn.pack(side="left", padx=5, pady=5)
+                                          width=15, 
+                                          height=3)
+        self.create_task_btn.pack(side="left", 
+                                  padx=5, pady=5)
 
-        self.create_subject_btn = tk.Button(frame, text="Create Subject",
+        self.create_subject_btn = tk.Button(frame, 
+                                            text="Create Subject",
                                             command=self.create_subject,
-                                            width=15, height=3)
-        self.create_subject_btn.pack(side="right", padx=5, pady=5)
+                                            width=15, 
+                                            height=3)
+        self.create_subject_btn.pack(side="right", 
+                                    padx=5, pady=5)
         
-    def create_task():
-        create_task_window = tk.Toplevel(root)
+    def create_task(self):
+        create_task_window = tk.Toplevel(self.root)
         create_task_window.title("Create a Task")
         create_task_window.geometry("250x150")
 
-        label = tk.Label(create_task_window, text="Creating a Task...")
+        label = tk.Label(create_task_window, text="Creating a Task")
         label.pack(pady=10)
         
         create_task_window.grab_set() #prevents interaction with main window
-        root.wait_window(create_task_window)
+        self.root.wait_window(create_task_window)
     
     def create_subject():
         pass
+
+class FloatingWindow:
+    def __init__(self):
+        create_task_window = tk.Toplevel(self)
+        create_task_window.title("Create a Task")
+        create_task_window.geometry("250x150")
+
+        label = tk.Label(create_task_window, text="Creating a Task")
+        label.pack(pady=10)
+        
+        create_task_window.grab_set() #prevents interaction with main window
+        self.wait_window(create_task_window)
+
+        name_label= tk.Label(root, text= 'Name of Task', font=('Arial', 10))
+        name_label.pack
 
 if __name__ == "__main__":
     main_window = tk.Tk()
