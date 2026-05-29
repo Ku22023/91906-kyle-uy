@@ -55,33 +55,31 @@ class PlannerApp:
 
         label = tk.Label(create_task_window, text="Creating a Task")
         label.pack(pady=10)
-        
-        create_task_window.grab_set() #prevents interaction with main window
-        self.root.wait_window(create_task_window)
-    
-        self.wait_window(create_task_window)
 
-        name_label= tk.Label(text= 'Name of Task', font=('Arial', 10))
-        name_label.pack()
+
+        frame = tk.Frame(create_task_window, width=200, height=200)
+        self.task_title_label = tk.Label(create_task_window, text="Task Title:")
+        self.task_title = tk.Entry(create_task_window)
+        self.task_title_label.pack(padx=20, side="left")
+        self.task_title.pack(padx=20, side="right")
+
+        self.task_description_label = tk.Label(create_task_window, text="Task Description:")
+        self.task_description = tk.Entry(create_task_window)
+        self.task_description_label.pack(padx=20, side="left")
+        self.task_description.pack(padx=20, side="right")
+
+
+        self.submit_btn = tk.Button(self.create_task_window, text="Add",
+                                    command = self.process_decision)
+        self.submit_btn.pack(pady=10)
+        self.cancel_btn = tk.Button(self.create_task_window, text="Cancel",
+                                    command = self.process_decision)
+        self.cancel_btn.pack(pady=10)
 
     def create_subject():
         pass
 
-class FloatingWindow:
-    def __init__(self, name):
-        self.name = name
-        create_task_window = tk.Toplevel(self)
-        create_task_window.title("Create a Task")
-        create_task_window.geometry("250x150")
 
-        label = tk.Label(create_task_window, text=f"Creating a {name}")
-        label.pack(pady=10)
-        
-        create_task_window.grab_set() #prevents interaction with main window
-        self.wait_window(create_task_window)
-
-        name_label= tk.Label(text= 'Name of Task', font=('Arial', 10))
-        name_label.pack
 
 if __name__ == "__main__":
     main_window = tk.Tk()
