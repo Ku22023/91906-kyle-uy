@@ -56,28 +56,47 @@ class PlannerApp:
         label = tk.Label(create_task_window, text="Creating a Task")
         label.pack(pady=10)
 
-
         frame = tk.Frame(create_task_window, width=200, height=200)
-        self.task_title_label = tk.Label(create_task_window, text="Task Title:")
-        self.task_title = tk.Entry(create_task_window)
-        self.task_title_label.pack(padx=20, side="left")
-        self.task_title.pack(padx=20, side="right")
 
-        self.task_description_label = tk.Label(create_task_window, text="Task Description:")
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=1)
+        frame.columnconfigure(2, weight=1)
+
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
+        frame.rowconfigure(2, weight=1)
+
+        frame.task_title_label = tk.Label(create_task_window, \
+                                         text="Task Title:")
+        frame.task_title = tk.Entry(create_task_window)
+
+        self.task_title_label.grid(column=0, row=0, padx=5, pady=5, sticky=tk.EW)
+        self.task_title.grid(column=1, row=0, padx=5, pady=5, sticky=tk.EW)
+        
+
+        self.task_description_label = tk.Label(self.create_task_window, \
+                                               text="Task Description:")
         self.task_description = tk.Entry(create_task_window)
-        self.task_description_label.pack(padx=20, side="left")
-        self.task_description.pack(padx=20, side="right")
+
+        self.task_description_label.grid(column=0, row=1, padx=5, pady=5, sticky=tk.EW)
+        self.task_description.grid(column=1, row=1, padx=5, pady=5, sticky=tk.EW)
 
 
         self.submit_btn = tk.Button(self.create_task_window, text="Add",
                                     command = self.process_decision)
-        self.submit_btn.pack(pady=10)
-        self.cancel_btn = tk.Button(self.create_task_window, text="Cancel",
+        self.submit_btn.grid(column=2, row=0)
+
+        self.cancel_btn = tk.Button(self.create_task_window, \
+                                    text="Cancel",
                                     command = self.process_decision)
-        self.cancel_btn.pack(pady=10)
+        
+        self.cancel_btn.pack(column=2, row=1)
 
     def create_subject():
         pass
+
+class  CreateWindow:
+    pass
 
 
 
