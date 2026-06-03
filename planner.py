@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 import json
 
+tasks = []
+subjects = []
+
 class Subject:
     """
     """
@@ -51,51 +54,74 @@ class PlannerApp:
     def create_task(self):
         create_task_window = tk.Toplevel(self.root)
         create_task_window.title("Create a Task")
-        create_task_window.geometry("250x150")
+        create_task_window.geometry("400x200")
 
-        label = tk.Label(create_task_window, text="Creating a Task")
+
+        #Title Frame
+        label = tk.Label(create_task_window, text="Creatingiuuyy a Task")
         label.pack(pady=10)
 
-        frame = tk.Frame(create_task_window, width=200, height=200)
 
-        frame.columnconfigure(0, weight=1)
-        frame.columnconfigure(1, weight=1)
-        frame.columnconfigure(2, weight=1)
+        #Frame with all the information collection
+        input_frame = tk.Frame(create_task_window, width=20, height=20)
+        input_frame.pack(padx=3, pady=3)
 
-        frame.rowconfigure(0, weight=1)
-        frame.rowconfigure(1, weight=1)
-        frame.rowconfigure(2, weight=1)
 
-        frame.task_title_label = tk.Label(create_task_window, \
+        input_frame.columnconfigure(0, weight=1)
+        input_frame.columnconfigure(1, weight=1)
+        input_frame.columnconfigure(2, weight=1)
+
+        input_frame.rowconfigure(0, weight=1)
+        input_frame.rowconfigure(1, weight=1)
+        input_frame.rowconfigure(2, weight=1)
+
+        input_frame.task_title_label = tk.Label(input_frame, \
                                          text="Task Title:")
-        frame.task_title = tk.Entry(create_task_window)
+        input_frame.task_title = tk.Entry(input_frame)
 
-        self.task_title_label.grid(column=0, row=0, padx=5, pady=5, sticky=tk.EW)
-        self.task_title.grid(column=1, row=0, padx=5, pady=5, sticky=tk.EW)
+        input_frame.task_title_label.grid(column=0, row=0, padx=5)
+        input_frame.task_title.grid(column=1, row=0, padx=5,)
         
 
-        self.task_description_label = tk.Label(self.create_task_window, \
+        input_frame.task_description_label = tk.Label(input_frame, \
                                                text="Task Description:")
-        self.task_description = tk.Entry(create_task_window)
+        input_frame.task_description = tk.Entry(input_frame)
 
-        self.task_description_label.grid(column=0, row=1, padx=5, pady=5, sticky=tk.EW)
-        self.task_description.grid(column=1, row=1, padx=5, pady=5, sticky=tk.EW)
+        input_frame.task_description_label.grid(column=0, row=1, padx=5,)
+        input_frame.task_description.grid(column=1, row=1, padx=5)
+
+        input_frame.task_due_date_label = tk.Label(input_frame, \
+                                                   text="Due Date (DD/MM/YY):")
+        input_frame.task_due_date = tk.Entry(input_frame)
+
+        input_frame.task_due_date_label.grid(column=0, row=2, padx=5)
+        input_frame.task_due_date.grid(column=1, row=2, padx=5)
+        input_frame.pack()
 
 
-        self.submit_btn = tk.Button(self.create_task_window, text="Add",
+        #Frame with buttons to cancel or Continue
+        button_frame = tk.Frame(create_task_window, width=40, height=80)
+        button_frame.submit_btn = tk.Button(button_frame, text="Add",
                                     command = self.process_decision)
-        self.submit_btn.grid(column=2, row=0)
+        button_frame.submit_btn.pack(side="left", padx=5)
 
-        self.cancel_btn = tk.Button(self.create_task_window, \
+        button_frame.cancel_btn = tk.Button(button_frame, \
                                     text="Cancel",
                                     command = self.process_decision)
         
-        self.cancel_btn.pack(column=2, row=1)
+        button_frame.cancel_btn.pack(side="right", padx=5)
+        button_frame.pack(pady=10)
 
-    def create_subject():
+
+
+    def create_subject(self):
         pass
 
-class  CreateWindow:
+    def process_decision(self):
+        print("hello")
+
+
+class CreateWindow:
     pass
 
 
