@@ -52,72 +52,89 @@ class PlannerApp:
                                     padx=5, pady=5)
         
     def create_task(self):
-        create_task_window = tk.Toplevel(self.root)
-        create_task_window.title("Create a Task")
-        create_task_window.geometry("400x200")
+        if len(subjects) == 0:
+            create_task_window = tk.Toplevel(self.root)
+            create_task_window.title("Create a Task")
+            create_task_window.geometry("400x200")
 
 
-        #Title Frame
-        label = tk.Label(create_task_window, text="Creating a Task")
-        label.pack(pady=10)
+            #Title Frame
+            label = tk.Label(create_task_window, text="Creating a Task")
+            label.pack(pady=10)
 
-        # Freezes main screen
-        create_task_window.transient(self.root)
-        create_task_window.grab_set()
-
-
-        #Frame with all the information collection
-        input_frame = tk.Frame(create_task_window, width=20, height=20)
-        input_frame.pack(padx=3, pady=3)
+            # Freezes main screen
+            create_task_window.transient(self.root)
+            create_task_window.grab_set()
 
 
-        input_frame.columnconfigure(0, weight=1)
-        input_frame.columnconfigure(1, weight=1)
-        input_frame.columnconfigure(2, weight=1)
-
-        input_frame.rowconfigure(0, weight=1)
-        input_frame.rowconfigure(1, weight=1)
-        input_frame.rowconfigure(2, weight=1)
-
-        input_frame.task_title_label = tk.Label(input_frame, \
-                                         text="Task Title:")
-        self.task_title = tk.Entry(input_frame)
-
-        input_frame.task_title_label.grid(column=0, row=0, padx=5)
-        self.task_title.grid(column=1, row=0, padx=5,)
-        
-
-        input_frame.task_description_label = tk.Label(input_frame, \
-                                               text="Task Description:")
-        self.task_description = tk.Entry(input_frame)
-
-        input_frame.task_description_label.grid(column=0, row=1, padx=5,)
-        self.task_description.grid(column=1, row=1, padx=5)
-
-        input_frame.task_due_date_label = tk.Label(input_frame, \
-                                                   text="Due Date (DD/MM/YY):")
-        self.task_due_date = tk.Entry(input_frame)
-
-        input_frame.task_due_date_label.grid(column=0, row=2, padx=5)
-        self.task_due_date.grid(column=1, row=2, padx=5)
-        input_frame.pack()
+            #Frame with all the information collection
+            input_frame = tk.Frame(create_task_window, width=20, height=20)
+            input_frame.pack(padx=3, pady=3)
 
 
-        #Frame with buttons to cancel or Continue
-        button_frame = tk.Frame(create_task_window, width=40, height=80)
-        button_frame.submit_btn = tk.Button(button_frame, text="Add",
-                                    command = self.process_decision)
-        button_frame.submit_btn.pack(side="left", padx=5)
+            input_frame.columnconfigure(0, weight=1)
+            input_frame.columnconfigure(1, weight=1)
+            input_frame.columnconfigure(2, weight=1)
+            input_frame.columnconfigure(3, weight=1)
 
-        button_frame.cancel_btn = tk.Button(button_frame, \
-                                    text="Cancel",
-                                    command = create_task_window.destroy)
-        
-        button_frame.cancel_btn.pack(side="right", padx=5)
-        button_frame.pack(pady=10)
+            input_frame.rowconfigure(0, weight=1)
+            input_frame.rowconfigure(1, weight=1)
+            input_frame.rowconfigure(2, weight=1)
+            input_frame.rowconfigure(3, weight=1)
 
-        #Freezes main window when popup opened
-        self.root.wait_window(create_task_window)
+            input_frame.task_title_label = tk.Label(input_frame, \
+                                            text="Task Title:")
+            self.task_title = tk.Entry(input_frame)
+
+            input_frame.task_title_label.grid(column=0, row=0, padx=5)
+            self.task_title.grid(column=1, row=0, padx=5,)
+            
+
+            input_frame.task_description_label = tk.Label(input_frame, \
+                                                text="Task Description:")
+            self.task_description = tk.Entry(input_frame)
+
+            input_frame.task_description_label.grid(column=0, row=1, padx=5,)
+            self.task_description.grid(column=1, row=1, padx=5)
+
+
+            input_frame.task_subject_label = tk.Label(input_frame, text="Subject:")
+            self.selected_subjects = tk.StringVar(value=subjects[0])
+            self.task_subject = tk.OptionMenu(input_frame, self.selected_subjects, *subjects)
+            self.task_subject.grid(column=1, row=2, padx=5)
+
+
+
+            input_frame.task_subject_label.grid(column=0, row=2, padx=5)
+            self.task_subject.grid(column=1, row=2, padx=5)
+
+
+            input_frame.task_due_date_label = tk.Label(input_frame, \
+                                                    text="Due Date (DD/MM/YY):")
+            self.task_due_date = tk.Entry(input_frame)
+
+            input_frame.task_due_date_label.grid(column=0, row=3, padx=5)
+            self.task_due_date.grid(column=1, row=3, padx=5)
+            input_frame.pack()
+
+
+            #Frame with buttons to cancel or Continue
+            button_frame = tk.Frame(create_task_window, width=40, height=80)
+            button_frame.submit_btn = tk.Button(button_frame, text="Add",
+                                        command = self.process_decision)
+            button_frame.submit_btn.pack(side="left", padx=5)
+
+            button_frame.cancel_btn = tk.Button(button_frame, \
+                                        text="Cancel",
+                                        command = create_task_window.destroy)
+            
+            button_frame.cancel_btn.pack(side="right", padx=5)
+            button_frame.pack(pady=10)
+
+            #Freezes main window when popup opened
+            self.root.wait_window(create_task_window)
+        else:
+            messagebox.showerror("error", "please create a subject first!")
 
     def create_subject(self):
         pass
@@ -129,14 +146,16 @@ class PlannerApp:
         title = self.task_title.get()
         description = self.task_description.get()
         due_date = self.task_due_date.get()
+        subject = self.selected_subjects.get()
+        
 
         
         due_date_split = due_date.split("/")
         
         if len(title.strip()) == 0 or len(description.strip()) == 0:
-            print("Missing Something")
+            messagebox.showerror("error", "Please enter into all fields!")
         elif len(due_date_split) < 3:
-            print("Error, you missed something!")
+            messagebox.showerror("error", "You did not enter the date properly")
         else:
             due_date_day = due_date_split[0]
             due_date_month = due_date_split[1]
@@ -145,15 +164,16 @@ class PlannerApp:
                 int(due_date_day)
                 int(due_date_month)
                 int(due_date_year)
-            except:
-                print("Error, you did not enter the date properly!")
+            except ValueError:
+                messagebox.showerror("error", "Error, you did not enter the date properly!")
+                return
 
             if int(due_date_day) >= 32 or int(due_date_day) <= 0:
-                print("error: day not possible!")
-            elif int(due_date_month) >= 13 or int(due_date_day) <= 0:
-                print("error, month not possible")
+                messagebox.showerror("error", "error: day not possible!")
+            elif int(due_date_month) >= 13 or int(due_date_month) <= 0:
+                messagebox.showerror("error", "error, month not possible")
             elif int(due_date_year) <= 2025:
-                print("Error: year not possible!")
+                messagebox.showerror("error", "Error: year not possible!")
             else:
                 print("Everything looks good!")
 
