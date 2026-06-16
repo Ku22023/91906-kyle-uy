@@ -2,8 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import json
 
-tasks = []
-subjects = []
+
 
 class Subject:
     """
@@ -20,6 +19,7 @@ class Task:
         self.name = name
         self.description = description
         self.due_date = due_date
+        
 
 class PlannerApp:
     """
@@ -28,6 +28,8 @@ class PlannerApp:
         self.root = root
         self.root.title("Planeroo")
         self.root.geometry("650x800")
+        self.tasks = []
+        self.subjects = ["Maths", "Physics"]
 
         self.title_label = tk.Label(root, text="Planeroo", \
                                     font=("Arial", 16))
@@ -52,7 +54,7 @@ class PlannerApp:
                                     padx=5, pady=5)
         
     def create_task(self):
-        if len(subjects) == 0:
+        if len(self.subjects) != 0:
             create_task_window = tk.Toplevel(self.root)
             create_task_window.title("Create a Task")
             create_task_window.geometry("400x200")
@@ -99,8 +101,8 @@ class PlannerApp:
 
 
             input_frame.task_subject_label = tk.Label(input_frame, text="Subject:")
-            self.selected_subjects = tk.StringVar(value=subjects[0])
-            self.task_subject = tk.OptionMenu(input_frame, self.selected_subjects, *subjects)
+            self.selected_subjects = tk.StringVar(value=self.subjects[0])
+            self.task_subject = tk.OptionMenu(input_frame, self.selected_subjects, *self.subjects)
             self.task_subject.grid(column=1, row=2, padx=5)
 
 
@@ -172,19 +174,14 @@ class PlannerApp:
                 messagebox.showerror("error", "error: day not possible!")
             elif int(due_date_month) >= 13 or int(due_date_month) <= 0:
                 messagebox.showerror("error", "error, month not possible")
-            elif int(due_date_year) <= 2025:
+            elif int(due_date_year) >= 2025:
                 messagebox.showerror("error", "Error: year not possible!")
             else:
-                print("Everything looks good!")
+                if int(due_date_month) == 1 or 2 or 3:
+                    messagebox.showinfo("Planeroo", "Task sucessfully created!")
+                    print("Everything looks good!")
 
 
-
-    def error_window(self):
-        pass
-
-
-class CreateWindow:
-    pass
 
 
 
