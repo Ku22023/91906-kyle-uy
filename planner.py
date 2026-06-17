@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from datetime import datetime
 import json
 
 
@@ -10,6 +11,7 @@ class Subject:
     def __init__(self, name, colour):
         self.name = name
         self.colour = colour
+        self.tasks = []
 
 class Task:
     """
@@ -19,6 +21,7 @@ class Task:
         self.name = name
         self.description = description
         self.due_date = due_date
+        self.completed = False
         
 
 class PlannerApp:
@@ -28,8 +31,8 @@ class PlannerApp:
         self.root = root
         self.root.title("Planeroo")
         self.root.geometry("650x800")
-        self.tasks = []
-        self.subjects = ["Maths", "Physics"]
+        self.tasks = {}
+        self.subjects = []
 
         self.title_label = tk.Label(root, text="Planeroo", \
                                     font=("Arial", 16))
@@ -151,35 +154,32 @@ class PlannerApp:
         subject = self.selected_subjects.get()
         
 
-        
-        due_date_split = due_date.split("/")
-        
+            
         if len(title.strip()) == 0 or len(description.strip()) == 0:
             messagebox.showerror("error", "Please enter into all fields!")
-        elif len(due_date_split) < 3:
-            messagebox.showerror("error", "You did not enter the date properly")
         else:
-            due_date_day = due_date_split[0]
-            due_date_month = due_date_split[1]
-            due_date_year = due_date_split[2]
-            try:
-                int(due_date_day)
-                int(due_date_month)
-                int(due_date_year)
-            except ValueError:
-                messagebox.showerror("error", "Error, you did not enter the date properly!")
-                return
+            date_validation = self.check_date(due_date)
+            if date_validation == 1:
+                messagebox.showinfo("Planeroo", "Task successfully created!")
+                len = 
+                task_{}
 
-            if int(due_date_day) >= 32 or int(due_date_day) <= 0:
-                messagebox.showerror("error", "error: day not possible!")
-            elif int(due_date_month) >= 13 or int(due_date_month) <= 0:
-                messagebox.showerror("error", "error, month not possible")
-            elif int(due_date_year) >= 2025:
-                messagebox.showerror("error", "Error: year not possible!")
-            else:
-                if int(due_date_month) == 1 or 2 or 3:
-                    messagebox.showinfo("Planeroo", "Task sucessfully created!")
-                    print("Everything looks good!")
+        
+
+
+
+    def check_date(self, due_date):
+        try:
+            due_date = datetime.strptime(due_date, "%d/%m/%y")
+        except ValueError:
+            messagebox.showerror("error", "please enter a valid date in DD/MM/YY format.")
+            return 0
+
+        if due_date.date() < datetime.now().date():
+            messagebox.showerror("error", "due date has already passed!")
+            return 0
+        else:
+            return 1
 
 
 
