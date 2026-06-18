@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from datetime import datetime
+from tkinter import colorchooser
 import json
 
 
@@ -12,6 +13,12 @@ class Subject:
         self.name = name
         self.colour = colour
         self.tasks = []
+    
+    def add_task(self, task):
+        self.tasks.append(task)
+
+    def remove_task(self, task):
+        self.tasks.remove(task)
 
 class Task:
     """
@@ -22,6 +29,8 @@ class Task:
         self.description = description
         self.due_date = due_date
         self.completed = False
+    def mark_complete(self):
+        self.completed = True
         
 
 class PlannerApp:
@@ -104,8 +113,9 @@ class PlannerApp:
 
 
             input_frame.task_subject_label = tk.Label(input_frame, text="Subject:")
-            self.selected_subjects = tk.StringVar(value=self.subjects[0])
-            self.task_subject = tk.OptionMenu(input_frame, self.selected_subjects, *self.subjects)
+            subject_names = [subject.name for subject in self.subjects]
+            self.selected_subjects = tk.StringVar(value=subject_names[0])
+
             self.task_subject.grid(column=1, row=2, padx=5)
 
 
@@ -142,7 +152,83 @@ class PlannerApp:
             messagebox.showerror("error", "please create a subject first!")
 
     def create_subject(self):
-        pass
+        create_subject_window = tk.Toplevel(self.root)
+        create_subject_window.title("Create a Subject")
+        create_subject_window.geometry("400x200")
+
+
+        #Title Frame
+        label = tk.Label(create_subject_window, text="Creating a Task")
+        label.pack(pady=10)
+
+        # Freezes main screen
+        create_subject_window.transient(self.root)
+        create_subject_window.grab_set()
+
+
+        #Frame with all the information collection
+        input_frame = tk.Frame(create_subject_window, width=20, height=20)
+        input_frame.pack(padx=3, pady=3)
+
+
+        input_frame.columnconfigure(0, weight=1)
+        input_frame.columnconfigure(1, weight=1)
+        input_frame.columnconfigure(2, weight=1)
+        input_frame.columnconfigure(3, weight=1)
+
+        input_frame.rowconfigure(0, weight=1)
+        input_frame.rowconfigure(1, weight=1)
+        input_frame.rowconfigure(2, weight=1)
+        input_frame.rowconfigure(3, weight=1)
+
+        input_frame.task_title_label = tk.Label(input_frame, \
+                                        text="Subject Name:")
+        self.task_title = tk.Entry(input_frame)
+
+        input_frame.task_title_label.grid(column=0, row=0, padx=5)
+        self.task_title.grid(column=1, row=0, padx=5,)
+        
+
+
+        input_frame.task_description_label = colorchooser.askcolor(input_frame)
+        self.task_description = tk.Entry(input_frame)
+
+        input_frame.task_description_label.grid(column=0, row=1, padx=5,)
+        self.task_description.grid(column=1, row=1, padx=5)
+
+
+
+        input_frame.task_due_date_label = tk.Label(input_frame, \
+                                                text="Due Date (DD/MM/YY):")
+        self.task_due_date = tk.Entry(input_frame)
+
+        input_frame.task_due_date_label.grid(column=0, row=3, padx=5)
+        self.task_due_date.grid(column=1, row=3, padx=5)
+        input_frame.pack()
+
+
+        #Frame with buttons to cancel or Continue
+        button_frame = tk.Frame(create_subject_window, width=40, height=80)
+        button_frame.submit_btn = tk.Button(button_frame, text="Add",
+                                    command = self.process_decision)
+        button_frame.submit_btn.pack(side="left", padx=5)
+
+        button_frame.cancel_btn = tk.Button(button_frame, \
+                                    text="Cancel",
+                                    command = create_subject_window.destroy)
+        
+        button_frame.cancel_btn.pack(side="right", padx=5)
+        button_frame.pack(pady=10)
+
+        #Freezes main window when popup opened
+        self.root.wait_window(create_subject_window)
+
+    def choose_colour(self):
+        colour = colorchooser.askcolor()[1]
+        if colour:
+            self.selected_colour = colour
+        
+
 
     def process_decision(self):
         '''
@@ -161,8 +247,9 @@ class PlannerApp:
             date_validation = self.check_date(due_date)
             if date_validation == 1:
                 messagebox.showinfo("Planeroo", "Task successfully created!")
-                len = 
-                task_{}
+
+                homework = Task(title, description, due_date)
+                subject.tasks.append(homework)
 
         
 
