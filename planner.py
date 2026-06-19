@@ -113,11 +113,9 @@ class PlannerApp:
 
 
             input_frame.task_subject_label = tk.Label(input_frame, text="Subject:")
-            subject_names = [subject.name for subject in self.subjects]
-            self.selected_subjects = tk.StringVar(value=subject_names[0])
-
+            self.selected_subjects = tk.StringVar(value=self.subjects[0])
+            self.task_subject = tk.OptionMenu(input_frame, self.selected_subjects, *self.subjects)
             self.task_subject.grid(column=1, row=2, padx=5)
-
 
 
             input_frame.task_subject_label.grid(column=0, row=2, padx=5)
@@ -136,7 +134,7 @@ class PlannerApp:
             #Frame with buttons to cancel or Continue
             button_frame = tk.Frame(create_task_window, width=40, height=80)
             button_frame.submit_btn = tk.Button(button_frame, text="Add",
-                                        command = self.process_decision)
+                                        command = self.process_task)
             button_frame.submit_btn.pack(side="left", padx=5)
 
             button_frame.cancel_btn = tk.Button(button_frame, \
@@ -158,7 +156,7 @@ class PlannerApp:
 
 
         #Title Frame
-        label = tk.Label(create_subject_window, text="Creating a Task")
+        label = tk.Label(create_subject_window, text="Creating a Subject")
         label.pack(pady=10)
 
         # Freezes main screen
@@ -181,36 +179,32 @@ class PlannerApp:
         input_frame.rowconfigure(2, weight=1)
         input_frame.rowconfigure(3, weight=1)
 
-        input_frame.task_title_label = tk.Label(input_frame, \
+        input_frame.subject_title_label = tk.Label(input_frame, \
                                         text="Subject Name:")
-        self.task_title = tk.Entry(input_frame)
+        self.subject_title = tk.Entry(input_frame)
 
         input_frame.task_title_label.grid(column=0, row=0, padx=5)
-        self.task_title.grid(column=1, row=0, padx=5,)
+        self.subject_title.grid(column=1, row=0, padx=5,)
         
+        self.selected_colour = "#FFFFFF"
 
 
-        input_frame.task_description_label = colorchooser.askcolor(input_frame)
-        self.task_description = tk.Entry(input_frame)
+        input_frame.subject_colour_label = tk.Label(input_frame, \
+                                                text="Colour:")
+        self.subject_colour = tk.Button(input_frame, text="Choose Colour",
+                                        command=self.choose_colour)
+        self.colour_preview = tk.Label(input_frame, width=3, bg=self.selected_colour)
+        self.colour_preview.grid(column=2, row=3, padx=2)
 
-        input_frame.task_description_label.grid(column=0, row=1, padx=5,)
-        self.task_description.grid(column=1, row=1, padx=5)
-
-
-
-        input_frame.task_due_date_label = tk.Label(input_frame, \
-                                                text="Due Date (DD/MM/YY):")
-        self.task_due_date = tk.Entry(input_frame)
-
-        input_frame.task_due_date_label.grid(column=0, row=3, padx=5)
-        self.task_due_date.grid(column=1, row=3, padx=5)
+        input_frame.subject_colour_label.grid(column=0, row=3, padx=2)
+        self.subject_colour.grid(column=1, row=3, padx=2, pady=3)
         input_frame.pack()
 
 
         #Frame with buttons to cancel or Continue
         button_frame = tk.Frame(create_subject_window, width=40, height=80)
         button_frame.submit_btn = tk.Button(button_frame, text="Add",
-                                    command = self.process_decision)
+                                    command = self.process_subject)
         button_frame.submit_btn.pack(side="left", padx=5)
 
         button_frame.cancel_btn = tk.Button(button_frame, \
@@ -220,17 +214,21 @@ class PlannerApp:
         button_frame.cancel_btn.pack(side="right", padx=5)
         button_frame.pack(pady=10)
 
+
+
+
         #Freezes main window when popup opened
         self.root.wait_window(create_subject_window)
 
     def choose_colour(self):
-        colour = colorchooser.askcolor()[1]
-        if colour:
-            self.selected_colour = colour
-        
+        colour = colorchooser.askcolor(title="Choose a colour for the subject!")
+
+        if colour[1] is not None:
+            self.selected_colour = colour[1]
+            self.colour_preview.config(bg=self.selected_colour)
 
 
-    def process_decision(self):
+    def process_task(self):
         '''
         Makes sure all the data is correct and valid. 
         '''
@@ -248,12 +246,8 @@ class PlannerApp:
             if date_validation == 1:
                 messagebox.showinfo("Planeroo", "Task successfully created!")
 
-                homework = Task(title, description, due_date)
-                subject.tasks.append(homework)
-
-        
-
-
+                homework = Task(subject, title, description, due_date)
+                self.subject.append(homework)
 
     def check_date(self, due_date):
         try:
@@ -267,6 +261,21 @@ class PlannerApp:
             return 0
         else:
             return 1
+
+    def process_subject(self):
+        '''
+        Makes sure all the data is correct and valid. 
+        '''
+        title = self.subject_title.get()
+        colour = self.selected_colour
+        
+
+        if len(title.strip()) == 0:
+            messagebox.showerror("error", "Please enter into all fields!")
+        else:
+            new_subject = Subject(title, colour)
+            self.subjects.append(new_subject)
+            messagebox.showinfo("Planeroo", "Subject successfully created!")
 
 
 
