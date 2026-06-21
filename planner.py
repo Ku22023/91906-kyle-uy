@@ -13,6 +13,9 @@ class Subject:
         self.name = name
         self.colour = colour
         self.tasks = []
+
+    def __str__(self):
+        return self.name
     
     def add_task(self, task):
         self.tasks.append(task)
@@ -67,22 +70,22 @@ class PlannerApp:
         
     def create_task(self):
         if len(self.subjects) != 0:
-            create_task_window = tk.Toplevel(self.root)
-            create_task_window.title("Create a Task")
-            create_task_window.geometry("400x200")
+            self.create_task_window = tk.Toplevel(self.root)
+            self.create_task_window.title("Create a Task")
+            self.create_task_window.geometry("400x200")
 
 
             #Title Frame
-            label = tk.Label(create_task_window, text="Creating a Task")
+            label = tk.Label(self.create_task_window, text="Creating a Task")
             label.pack(pady=10)
 
             # Freezes main screen
-            create_task_window.transient(self.root)
-            create_task_window.grab_set()
+            self.create_task_window.transient(self.root)
+            self.create_task_window.grab_set()
 
 
             #Frame with all the information collection
-            input_frame = tk.Frame(create_task_window, width=20, height=20)
+            input_frame = tk.Frame(self.create_task_window, width=20, height=20)
             input_frame.pack(padx=3, pady=3)
 
 
@@ -132,40 +135,40 @@ class PlannerApp:
 
 
             #Frame with buttons to cancel or Continue
-            button_frame = tk.Frame(create_task_window, width=40, height=80)
+            button_frame = tk.Frame(self.create_task_window, width=40, height=80)
             button_frame.submit_btn = tk.Button(button_frame, text="Add",
                                         command = self.process_task)
             button_frame.submit_btn.pack(side="left", padx=5)
 
             button_frame.cancel_btn = tk.Button(button_frame, \
                                         text="Cancel",
-                                        command = create_task_window.destroy)
+                                        command = self.create_task_window.destroy)
             
             button_frame.cancel_btn.pack(side="right", padx=5)
             button_frame.pack(pady=10)
 
             #Freezes main window when popup opened
-            self.root.wait_window(create_task_window)
+            self.root.wait_window(self.create_task_window)
         else:
             messagebox.showerror("error", "please create a subject first!")
 
     def create_subject(self):
-        create_subject_window = tk.Toplevel(self.root)
-        create_subject_window.title("Create a Subject")
-        create_subject_window.geometry("400x200")
+        self.create_subject_window = tk.Toplevel(self.root)
+        self.create_subject_window.title("Create a Subject")
+        self.create_subject_window.geometry("400x200")
 
 
         #Title Frame
-        label = tk.Label(create_subject_window, text="Creating a Subject")
+        label = tk.Label(self.create_subject_window, text="Creating a Subject")
         label.pack(pady=10)
 
         # Freezes main screen
-        create_subject_window.transient(self.root)
-        create_subject_window.grab_set()
+        self.create_subject_window.transient(self.root)
+        self.create_subject_window.grab_set()
 
 
         #Frame with all the information collection
-        input_frame = tk.Frame(create_subject_window, width=20, height=20)
+        input_frame = tk.Frame(self.create_subject_window, width=20, height=20)
         input_frame.pack(padx=3, pady=3)
 
 
@@ -183,7 +186,7 @@ class PlannerApp:
                                         text="Subject Name:")
         self.subject_title = tk.Entry(input_frame)
 
-        input_frame.task_title_label.grid(column=0, row=0, padx=5)
+        input_frame.subject_title_label.grid(column=0, row=0, padx=5)
         self.subject_title.grid(column=1, row=0, padx=5,)
         
         self.selected_colour = "#FFFFFF"
@@ -202,23 +205,21 @@ class PlannerApp:
 
 
         #Frame with buttons to cancel or Continue
-        button_frame = tk.Frame(create_subject_window, width=40, height=80)
+        button_frame = tk.Frame(self.create_subject_window, width=40, height=80)
         button_frame.submit_btn = tk.Button(button_frame, text="Add",
                                     command = self.process_subject)
         button_frame.submit_btn.pack(side="left", padx=5)
 
         button_frame.cancel_btn = tk.Button(button_frame, \
                                     text="Cancel",
-                                    command = create_subject_window.destroy)
+                                    command = self.create_subject_window.destroy)
         
         button_frame.cancel_btn.pack(side="right", padx=5)
         button_frame.pack(pady=10)
 
 
-
-
         #Freezes main window when popup opened
-        self.root.wait_window(create_subject_window)
+        self.root.wait_window(self.create_subject_window)
 
     def choose_colour(self):
         colour = colorchooser.askcolor(title="Choose a colour for the subject!")
@@ -244,10 +245,16 @@ class PlannerApp:
         else:
             date_validation = self.check_date(due_date)
             if date_validation == 1:
-                messagebox.showinfo("Planeroo", "Task successfully created!")
 
                 homework = Task(subject, title, description, due_date)
-                self.subject.append(homework)
+                selected_name = self.selected_subjects.get()
+                for subj in self.subjects:
+                    if subj.name == selected_name:
+                        subj.add_task(homework)
+                
+                self.create_task_window.destroy()
+                messagebox.showinfo("Planeroo", "Task successfully created!")
+
 
     def check_date(self, due_date):
         try:
@@ -275,8 +282,9 @@ class PlannerApp:
         else:
             new_subject = Subject(title, colour)
             self.subjects.append(new_subject)
+            self.create_subject_window.destroy()
             messagebox.showinfo("Planeroo", "Subject successfully created!")
-
+        
 
 
 
