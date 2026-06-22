@@ -23,6 +23,14 @@ class Subject:
     def remove_task(self, task):
         self.tasks.remove(task)
 
+    def convert_to_dictionary(self):
+        return {
+            "name": self.name,
+            "colour": self.colour,
+            "tasks": [task.convert_to_dictionary() for task in self.tasks]
+        }
+
+
 class Task:
     """
     """
@@ -34,6 +42,13 @@ class Task:
         self.completed = False
     def mark_complete(self):
         self.completed = True
+    def convert_to_dictionary(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "due_date": self.due_date,
+            "completed": self.completed
+        }
         
 
 class PlannerApp:
@@ -45,6 +60,7 @@ class PlannerApp:
         self.root.geometry("650x800")
         self.tasks = {}
         self.subjects = []
+        self.load_data()
 
         self.title_label = tk.Label(root, text="Planeroo", \
                                     font=("Arial", 16))
@@ -67,6 +83,21 @@ class PlannerApp:
                                             height=3)
         self.create_subject_btn.pack(side="right", 
                                     padx=5, pady=5)
+        
+        subject_display = tk.Frame(self.root, width=20, height=20)
+        subject_display.pack(padx=3, pady=3)
+
+
+        subject_display.columnconfigure(0, weight=1)
+        subject_display.columnconfigure(1, weight=1)
+        subject_display.columnconfigure(2, weight=1)
+        subject_display.columnconfigure(3, weight=1)
+
+        subject_display.rowconfigure(0, weight=1)
+        subject_display.rowconfigure(1, weight=1)
+        subject_display.rowconfigure(2, weight=1)
+        subject_display.rowconfigure(3, weight=1)
+
         
     def create_task(self):
         if len(self.subjects) != 0:
@@ -244,14 +275,14 @@ class PlannerApp:
             messagebox.showerror("error", "Please enter into all fields!")
         else:
             date_validation = self.check_date(due_date)
-            if date_validation == 1:
+            if date_validation == True:
 
                 homework = Task(subject, title, description, due_date)
                 selected_name = self.selected_subjects.get()
                 for subj in self.subjects:
                     if subj.name == selected_name:
                         subj.add_task(homework)
-                
+                self.save_data()
                 self.create_task_window.destroy()
                 messagebox.showinfo("Planeroo", "Task successfully created!")
 
@@ -265,9 +296,9 @@ class PlannerApp:
 
         if due_date.date() < datetime.now().date():
             messagebox.showerror("error", "due date has already passed!")
-            return 0
+            return False
         else:
-            return 1
+            return True
 
     def process_subject(self):
         '''
@@ -279,15 +310,49 @@ class PlannerApp:
 
         if len(title.strip()) == 0:
             messagebox.showerror("error", "Please enter into all fields!")
-        else:
-            new_subject = Subject(title, colour)
-            self.subjects.append(new_subject)
-            self.create_subject_window.destroy()
-            messagebox.showinfo("Planeroo", "Subject successfully created!")
+            return
         
+        for subject in self.subjects:
+            if subject.name.lower() == title.lower():
+                messagebox.showerror("error", "subject already exists!")
+                return
+        new_subject = Subject(title, colour)
+        self.subjects.append(new_subject)
+        self.save_data()
 
+        self.create_subject_window.destroy()
+        messagebox.showinfo("Planeroo", "Subject successfully created!")
+    
+    def save_data(self):
+        data = {
+            "subjects": [subject.convert_to_dictionary() for subject in self.subjects]
+        }
 
+        with open("planner_data.json", "w") as file:
+            json.dump(data,file, indent=4)
 
+    def load_data(self):
+        try:
+            with open("planner_data.json", "r") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            return
+        for subject_data in data["subjects"]:
+            subject = Subject(
+                subject_data["name"],
+                subject_data["colour"],
+            )
+            self.subjects.append(subject)
+    
+            for task_data in subject_data["tasks"]:
+                task = Task(
+                    subject.name,
+                    task_data["name"],
+                    task_data["description"],
+                    task_data["due_date"]
+                )
+                task.completed = task_data["completed"]
+                subject.add_task(task)
 
 if __name__ == "__main__":
     main_window = tk.Tk()
