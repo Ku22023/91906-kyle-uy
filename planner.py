@@ -58,7 +58,6 @@ class PlannerApp:
         self.root = root
         self.root.title("Planeroo")
         self.root.geometry("650x800")
-        self.tasks = {}
         self.subjects = []
         self.load_data()
 
@@ -89,14 +88,28 @@ class PlannerApp:
 
 
         subject_display.columnconfigure(0, weight=1)
-        subject_display.columnconfigure(1, weight=1)
-        subject_display.columnconfigure(2, weight=1)
-        subject_display.columnconfigure(3, weight=1)
 
-        subject_display.rowconfigure(0, weight=1)
-        subject_display.rowconfigure(1, weight=1)
-        subject_display.rowconfigure(2, weight=1)
-        subject_display.rowconfigure(3, weight=1)
+        filter_frame = tk.Frame(root)
+        filter_frame.pack(pady=5)
+        tk.Label(filter_frame, text="Show:").pack(side="left", padx="5")
+        self.filter_mode = tk.StringVar(value="all")
+        for label, value in [
+            ("All", "all"),
+            ("Complete", "complete"),
+            ("Incomplete", "incomplete")
+        ]:
+            tk.Radiobutton(filter_frame, text=label, variable=self.filter_mode, value=value,
+                           command=self.refresh_display).pack(side="left")
+            
+        scroll_container = tk.Frame(root)
+        scroll_container.pack(fill="both", expand=True, padx=10, pady=5)
+        self.canvas = tk.Canvas(scroll_container)
+        scrollbar = tk.Scrollbar(scroll_container, orient="vertical", command=self.canvas.yview)
+        self.subject_display = tk.Frame(self.canvas)
+        self.subject_display.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self._window_id = self.canvas.create_window(0,0, window =self.subject_display, anchor="nw")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+#        self.canvas.bind_all("<Mousewhe")
 
         
     def create_task(self):
@@ -279,7 +292,7 @@ class PlannerApp:
 
                 homework = Task(subject, title, description, due_date)
                 selected_name = self.selected_subjects.get()
-                for subj in self.subjects:
+                for subj in self.subjects:  
                     if subj.name == selected_name:
                         subj.add_task(homework)
                 self.save_data()
@@ -353,6 +366,9 @@ class PlannerApp:
                 )
                 task.completed = task_data["completed"]
                 subject.add_task(task)
+    
+    def refresh_display(self):
+        pass
 
 if __name__ == "__main__":
     main_window = tk.Tk()

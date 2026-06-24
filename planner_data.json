@@ -11,6 +11,11 @@
                     "completed": false
                 }
             ]
+        },
+        {
+            "name": "asd",
+            "colour": "#FFFFFF",
+            "tasks": []
         }
     ]
 }
