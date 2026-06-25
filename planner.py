@@ -100,16 +100,10 @@ class PlannerApp:
         ]:
             tk.Radiobutton(filter_frame, text=label, variable=self.filter_mode, value=value,
                            command=self.refresh_display).pack(side="left")
+        self.display_frame = tk.Frame(root)
+        self.display_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.refresh_display()
             
-        scroll_container = tk.Frame(root)
-        scroll_container.pack(fill="both", expand=True, padx=10, pady=5)
-        self.canvas = tk.Canvas(scroll_container)
-        scrollbar = tk.Scrollbar(scroll_container, orient="vertical", command=self.canvas.yview)
-        self.subject_display = tk.Frame(self.canvas)
-        self.subject_display.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self._window_id = self.canvas.create_window(0,0, window =self.subject_display, anchor="nw")
-        self.canvas.configure(yscrollcommand=scrollbar.set)
-#        self.canvas.bind_all("<Mousewhe")
 
         
     def create_task(self):
@@ -298,6 +292,7 @@ class PlannerApp:
                 self.save_data()
                 self.create_task_window.destroy()
                 messagebox.showinfo("Planeroo", "Task successfully created!")
+                self.refresh_display()
 
 
     def check_date(self, due_date):
@@ -332,6 +327,7 @@ class PlannerApp:
         new_subject = Subject(title, colour)
         self.subjects.append(new_subject)
         self.save_data()
+        self.refresh_display()
 
         self.create_subject_window.destroy()
         messagebox.showinfo("Planeroo", "Subject successfully created!")
@@ -368,7 +364,30 @@ class PlannerApp:
                 subject.add_task(task)
     
     def refresh_display(self):
-        pass
+        for widget in self.display_frame.winfo_children():
+            widget.destroy()
+
+        for subject in self.subjects:
+            subject_frame = tk.Frame(self.display_frame, bg=subject.colour, relief="ridge", bd=2)
+            subject_frame.pack(fill="x", pady=5)
+            tk.Label(subject_frame, 
+                     text=subject.name, 
+                     bg=subject.colour, 
+                     font=("Arial", 12, "bold")
+                ).pack(anchor="w", padx=5, pady=2)
+
+            for task in subject.tasks:
+                status = "✓" if task.completed else "x"
+                tk.Label(subject_frame, 
+                         text=f"{status} {task.name} - {task.due_date} \n {task.description}",
+                        bg=subject.colour
+                    ).pack(anchor="w", padx=20)
+
+    def toggle_task(self, task, var):
+        task.completed = bool(var.get)
+        self.save_data()
+        self.refresh_display
+
 
 if __name__ == "__main__":
     main_window = tk.Tk()
