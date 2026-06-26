@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from datetime import datetime
 from tkinter import colorchooser
+from tkinter import *
 import json
 
 
@@ -50,7 +51,6 @@ class Task:
             "completed": self.completed
         }
         
-
 class PlannerApp:
     """
     """
@@ -63,25 +63,26 @@ class PlannerApp:
 
         self.title_label = tk.Label(root, text="Planeroo", \
                                     font=("Arial", 16))
-        self.title_label.pack(pady=10)
+        self.title_label.pack(pady=1)   
 
-        frame = tk.Frame(root, width=200, height=200)
-        frame.pack(padx=10, pady=10)
+        frame = tk.Frame(root)
+        frame.pack(padx=5, pady=1)
 
-        self.create_task_btn = tk.Button(frame, text="Create Task",
-                                          command=self.create_task,
-                                          width=15, 
-                                          height=3)
+        self.create_task_btn = tk.Button(frame,
+                                        text="Create Task",
+                                        command=self.create_task,
+                                        width=12, 
+                                        height=2)
         self.create_task_btn.pack(side="left", 
                                   padx=5)
 
         self.create_subject_btn = tk.Button(frame, 
                                             text="Create Subject",
                                             command=self.create_subject,
-                                            width=15, 
-                                            height=3)
+                                            width=12, 
+                                            height=2)
         self.create_subject_btn.pack(side="right", 
-                                    padx=5, pady=5)
+                                    padx=5)
         
         subject_display = tk.Frame(self.root, width=20, height=20)
         subject_display.pack(padx=3, pady=3)
@@ -300,7 +301,7 @@ class PlannerApp:
             due_date = datetime.strptime(due_date, "%d/%m/%y")
         except ValueError:
             messagebox.showerror("error", "please enter a valid date in DD/MM/YY format.")
-            return 0
+            return False
 
         if due_date.date() < datetime.now().date():
             messagebox.showerror("error", "due date has already passed!")
@@ -332,36 +333,6 @@ class PlannerApp:
         self.create_subject_window.destroy()
         messagebox.showinfo("Planeroo", "Subject successfully created!")
     
-    def save_data(self):
-        data = {
-            "subjects": [subject.convert_to_dictionary() for subject in self.subjects]
-        }
-
-        with open("planner_data.json", "w") as file:
-            json.dump(data,file, indent=4)
-
-    def load_data(self):
-        try:
-            with open("planner_data.json", "r") as file:
-                data = json.load(file)
-        except FileNotFoundError:
-            return
-        for subject_data in data["subjects"]:
-            subject = Subject(
-                subject_data["name"],
-                subject_data["colour"],
-            )
-            self.subjects.append(subject)
-    
-            for task_data in subject_data["tasks"]:
-                task = Task(
-                    subject.name,
-                    task_data["name"],
-                    task_data["description"],
-                    task_data["due_date"]
-                )
-                task.completed = task_data["completed"]
-                subject.add_task(task)
     
     def refresh_display(self):
         for widget in self.display_frame.winfo_children():
@@ -370,6 +341,19 @@ class PlannerApp:
         for subject in self.subjects:
             subject_frame = tk.Frame(self.display_frame, bg=subject.colour, relief="ridge", bd=2)
             subject_frame.pack(fill="x", pady=5)
+
+            scrollbar = Scrollbar(subject_frame, orient=VERTICAL, command=subject_frame.yview)
+            scrollbar.pack(side=RIGHT, fill=Y)
+
+            subject_frame.configure(yscrollcommand=scrollbar.set)
+            scrollable_frame = Frame(subject_frame)
+
+            subject_frame.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            scrollable_frame.bind("<Configure>", lambda e: subject_frame.configure(scrollregion=canvas.bbox("all")))
+
+            for i in range(30):
+                Label(scrollable_frame, text=f"Item {i+1}", width=20).pack(pady=5)
+
             header = tk.Frame(subject_frame, bg=subject.colour)
             header.pack(fill="x")
             tk.Label(header, 
@@ -445,10 +429,39 @@ class PlannerApp:
             self.save_data()
             self.refresh_display()
 
+    
+    def save_data(self):
+        data = {
+            "subjects": [subject.convert_to_dictionary() for subject in self.subjects]
+        }
+
+        with open("planner_data.json", "w") as file:
+            json.dump(data,file, indent=4)
+
+    def load_data(self):
+        try:
+            with open("planner_data.json", "r") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            return
+        for subject_data in data["subjects"]:
+            subject = Subject(
+                subject_data["name"],
+                subject_data["colour"],
+            )
+            self.subjects.append(subject)
+    
+            for task_data in subject_data["tasks"]:
+                task = Task(
+                    subject.name,
+                    task_data["name"],
+                    task_data["description"],
+                    task_data["due_date"]
+                )
+                task.completed = task_data["completed"]
+                subject.add_task(task)
 
 if __name__ == "__main__":
     main_window = tk.Tk()
     app = PlannerApp(main_window)
     main_window.mainloop()
-
-    

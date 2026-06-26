@@ -5,12 +5,6 @@
             "colour": "#00ffff",
             "tasks": [
                 {
-                    "name": "Penar",
-                    "description": "integration 1 billion",
-                    "due_date": "24/6/26",
-                    "completed": true
-                },
-                {
                     "name": "weenar",
                     "description": "3refwpo",
                     "due_date": "12/7/26",
@@ -27,6 +21,62 @@
                     "description": "for english 3.1, written text",
                     "due_date": "28/6/26",
                     "completed": true
+                }
+            ]
+        },
+        {
+            "name": "DTP",
+            "colour": "#ff80ff",
+            "tasks": [
+                {
+                    "name": "Finish Delete subject",
+                    "description": "Functions for task and subject, as well as fill in testing.",
+                    "due_date": "26/6/26",
+                    "completed": false
+                }
+            ]
+        },
+        {
+            "name": "werty",
+            "colour": "#FFFFFF",
+            "tasks": [
+                {
+                    "name": "wretwert",
+                    "description": "wretwert",
+                    "due_date": "12/12/26",
+                    "completed": false
+                }
+            ]
+        },
+        {
+            "name": "rwtwrtwert",
+            "colour": "#008040",
+            "tasks": []
+        },
+        {
+            "name": "sdf",
+            "colour": "#FFFFFF",
+            "tasks": []
+        },
+        {
+            "name": "dsfdsfds",
+            "colour": "#FFFFFF",
+            "tasks": []
+        },
+        {
+            "name": "sdfsdf",
+            "colour": "#FFFFFF",
+            "tasks": []
+        },
+        {
+            "name": "sdfsdfds",
+            "colour": "#FFFFFF",
+            "tasks": [
+                {
+                    "name": "dsf",
+                    "description": "dsf",
+                    "due_date": "25/12/27",
+                    "completed": false
                 }
             ]
         }
