@@ -73,7 +73,7 @@ class PlannerApp:
                                           width=15, 
                                           height=3)
         self.create_task_btn.pack(side="left", 
-                                  padx=5, pady=5)
+                                  padx=5)
 
         self.create_subject_btn = tk.Button(frame, 
                                             text="Create Subject",
@@ -284,10 +284,10 @@ class PlannerApp:
             date_validation = self.check_date(due_date)
             if date_validation == True:
 
-                homework = Task(subject, title, description, due_date)
                 selected_name = self.selected_subjects.get()
                 for subj in self.subjects:  
                     if subj.name == selected_name:
+                        homework = Task(subject, title, description, due_date)
                         subj.add_task(homework)
                 self.save_data()
                 self.create_task_window.destroy()
@@ -370,23 +370,80 @@ class PlannerApp:
         for subject in self.subjects:
             subject_frame = tk.Frame(self.display_frame, bg=subject.colour, relief="ridge", bd=2)
             subject_frame.pack(fill="x", pady=5)
-            tk.Label(subject_frame, 
+            header = tk.Frame(subject_frame, bg=subject.colour)
+            header.pack(fill="x")
+            tk.Label(header, 
                      text=subject.name, 
                      bg=subject.colour, 
                      font=("Arial", 12, "bold")
-                ).pack(anchor="w", padx=5, pady=2)
+                ).pack(side="left", padx=5)
+            
+            tk.Button(
+                header,
+                text="Delete Subject",
+                command=lambda s=subject: self.delete_subject(s)
+            ).pack(side="right", padx=5, pady=5)
 
             for task in subject.tasks:
-                status = "✓" if task.completed else "x"
-                tk.Label(subject_frame, 
-                         text=f"{status} {task.name} - {task.due_date} \n {task.description}",
-                        bg=subject.colour
-                    ).pack(anchor="w", padx=20)
+                mode = self.filter_mode.get()
+                if mode == "complete" and not task.completed:
+                    continue
+                if mode == "incomplete" and task.completed:
+                    continue
+
+                task_frame = tk.Frame(subject_frame, bg=subject.colour)
+                task_frame.pack(fill="x", padx=20, pady=2)
+
+                top_row = tk.Frame(task_frame, bg=subject.colour)
+                top_row.pack(fill="x")
+
+                completed_var = tk.BooleanVar(value=task.completed)
+
+                tk.Checkbutton(
+                    top_row,
+                    text=f"{task.name} - {task.due_date}",
+                    variable=completed_var,
+                    bg=subject.colour,
+                    command=lambda t=task, v=completed_var: self.toggle_task(t,v)
+                ).pack(side="left")
+
+                tk.Button(
+                    top_row,
+                    text="Delete",
+                    command = lambda s=subject, t=task: self.delete_task(s, t)
+                ).pack(side="right")
+
+                tk.Label(
+                    task_frame,
+                    text=f"- {task.description}",
+                    bg=subject.colour,
+                ).pack(side="left", padx=40)
 
     def toggle_task(self, task, var):
-        task.completed = bool(var.get)
+        task.completed = var.get()
         self.save_data()
-        self.refresh_display
+        self.refresh_display()
+
+    def delete_task(self, subject, task):
+        confirm = messagebox.askyesno(
+            "Delete Task",
+            f"Are you sure you want to delete {task.name}?"
+        )
+
+        if confirm:
+            subject.remove_task(task)
+            self.save_data()
+            self.refresh_display()
+    
+    def delete_subject(self, subject):
+        confirm = messagebox.askyesno(
+            "Delete Subject",
+            f"Are you sure you want to delete {subject.name} and all its tasks?"
+        )
+        if confirm:
+            self.subjects.remove(subject)
+            self.save_data()
+            self.refresh_display()
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@
                     "name": "Penar",
                     "description": "integration 1 billion",
                     "due_date": "24/6/26",
-                    "completed": false
+                    "completed": true
                 },
                 {
                     "name": "weenar",
@@ -19,9 +19,16 @@
             ]
         },
         {
-            "name": "asd",
-            "colour": "#FFFFFF",
-            "tasks": []
+            "name": "English",
+            "colour": "#99e6da",
+            "tasks": [
+                {
+                    "name": "Finish practice essay",
+                    "description": "for english 3.1, written text",
+                    "due_date": "28/6/26",
+                    "completed": true
+                }
+            ]
         }
     ]
 }
