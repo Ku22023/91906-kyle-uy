@@ -60,7 +60,7 @@ class PlannerApp:
         self.subjects = []
         self.load_data()
 
-        self.title_label = tk.Label(root, text="Planeroo", \
+        self.title_label = tk.Label(root, text="Planeroo",
                                     font=("Arial", 16))
         self.title_label.pack(pady=1)   
 
@@ -70,18 +70,14 @@ class PlannerApp:
         self.create_task_btn = tk.Button(frame,
                                         text="Create Task",
                                         command=self.create_task,
-                                        width=12, 
-                                        height=2)
-        self.create_task_btn.pack(side="left", 
-                                  padx=5)
+                                        width=12, height=2)
+        self.create_task_btn.pack(side="left", padx=5)
 
         self.create_subject_btn = tk.Button(frame, 
                                             text="Create Subject",
                                             command=self.create_subject,
-                                            width=12, 
-                                            height=2)
-        self.create_subject_btn.pack(side="right", 
-                                    padx=5)
+                                            width=12, height=2)
+        self.create_subject_btn.pack(side="right", padx=5)
         
         subject_display = tk.Frame(self.root, width=20, height=20)
         subject_display.pack(padx=3, pady=3)
@@ -98,11 +94,15 @@ class PlannerApp:
             ("Complete", "complete"),
             ("Incomplete", "incomplete")
         ]:
-            tk.Radiobutton(filter_frame, text=label, variable=self.filter_mode, value=value,
-                           command=self.refresh_display).pack(side="left")
+            tk.Radiobutton(filter_frame, text=label,
+                            variable=self.filter_mode,
+                            value=value,
+                            command=self.refresh_display).pack(side="left")
+            
         self.canvas = tk.Canvas(root)
         self.scrollbar = tk.Scrollbar(root, orient="vertical",
                                       command=self.canvas.yview)
+        
         self.display_frame = tk.Frame(self.canvas)
         self.display_frame.bind(
             "<Configure>",
@@ -110,11 +110,13 @@ class PlannerApp:
                 scrollregion=self.canvas.bbox("all")
             )
         )
+
         self.canvas_window = self.canvas.create_window(
             (0,0),
             window=self.display_frame,
             anchor="nw"
         )
+
         self.canvas.bind("<Configure>", self.resize_canvas)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
         self.canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
@@ -133,7 +135,6 @@ class PlannerApp:
             self.create_task_window.title("Create a Task")
             self.create_task_window.geometry("400x200")
 
-
             #Title Frame
             label = tk.Label(self.create_task_window, text="Creating a Task")
             label.pack(pady=10)
@@ -141,7 +142,6 @@ class PlannerApp:
             # Freezes main screen
             self.create_task_window.transient(self.root)
             self.create_task_window.grab_set()
-
 
             #Frame with all the information collection
             input_frame = tk.Frame(self.create_task_window, width=20, height=20)
@@ -158,34 +158,31 @@ class PlannerApp:
             input_frame.rowconfigure(2, weight=1)
             input_frame.rowconfigure(3, weight=1)
 
-            input_frame.task_title_label = tk.Label(input_frame, \
-                                            text="Task Title:")
+            input_frame.task_title_label = tk.Label(input_frame,
+                                                    text="Task Title:")
             self.task_title = tk.Entry(input_frame)
-
             input_frame.task_title_label.grid(column=0, row=0, padx=5)
             self.task_title.grid(column=1, row=0, padx=5,)
             
-
-            input_frame.task_description_label = tk.Label(input_frame, \
-                                                text="Task Description:")
+            input_frame.task_description_label = tk.Label(input_frame,
+                                                    text="Task Description:")
             self.task_description = tk.Entry(input_frame)
-
             input_frame.task_description_label.grid(column=0, row=1, padx=5,)
             self.task_description.grid(column=1, row=1, padx=5)
 
-
-            input_frame.task_subject_label = tk.Label(input_frame, text="Subject:")
+            input_frame.task_subject_label = tk.Label(input_frame, 
+                                                    text="Subject:")
             self.selected_subjects = tk.StringVar(value=self.subjects[0])
-            self.task_subject = tk.OptionMenu(input_frame, self.selected_subjects, *self.subjects)
+            self.task_subject = tk.OptionMenu(input_frame, 
+                                            self.selected_subjects, 
+                                            *self.subjects)
             self.task_subject.grid(column=1, row=2, padx=5)
-
 
             input_frame.task_subject_label.grid(column=0, row=2, padx=5)
             self.task_subject.grid(column=1, row=2, padx=5)
 
-
-            input_frame.task_due_date_label = tk.Label(input_frame, \
-                                                    text="Due Date (DD/MM/YY):")
+            input_frame.task_due_date_label = tk.Label(input_frame,
+                                                text="Due Date (DD/MM/YY):")
             self.task_due_date = tk.Entry(input_frame)
 
             input_frame.task_due_date_label.grid(column=0, row=3, padx=5)
@@ -194,7 +191,8 @@ class PlannerApp:
 
 
             #Frame with buttons to cancel or Continue
-            button_frame = tk.Frame(self.create_task_window, width=40, height=80)
+            button_frame = tk.Frame(self.create_task_window, 
+                                    width=40, height=80)
             button_frame.submit_btn = tk.Button(button_frame, text="Add",
                                         command = self.process_task)
             button_frame.submit_btn.pack(side="left", padx=5)
