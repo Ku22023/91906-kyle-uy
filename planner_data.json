@@ -21,6 +21,12 @@
                     "description": "for english 3.1, written text",
                     "due_date": "28/6/26",
                     "completed": true
+                },
+                {
+                    "name": "EP - 50 hardest words",
+                    "description": "level 2",
+                    "due_date": "29/6/26",
+                    "completed": false
                 }
             ]
         },
@@ -39,14 +45,7 @@
         {
             "name": "werty",
             "colour": "#FFFFFF",
-            "tasks": [
-                {
-                    "name": "wretwert",
-                    "description": "wretwert",
-                    "due_date": "12/12/26",
-                    "completed": false
-                }
-            ]
+            "tasks": []
         },
         {
             "name": "rwtwrtwert",
@@ -56,7 +55,14 @@
         {
             "name": "sdf",
             "colour": "#FFFFFF",
-            "tasks": []
+            "tasks": [
+                {
+                    "name": "jackuni",
+                    "description": "MON",
+                    "due_date": "29/7/26",
+                    "completed": false
+                }
+            ]
         },
         {
             "name": "dsfdsfds",

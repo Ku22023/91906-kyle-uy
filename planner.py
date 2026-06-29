@@ -1,8 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, colorchooser
 from datetime import datetime
-from tkinter import colorchooser
-from tkinter import *
+
 import json
 
 
@@ -101,11 +100,32 @@ class PlannerApp:
         ]:
             tk.Radiobutton(filter_frame, text=label, variable=self.filter_mode, value=value,
                            command=self.refresh_display).pack(side="left")
-        self.display_frame = tk.Frame(root)
-        self.display_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.canvas = tk.Canvas(root)
+        self.scrollbar = tk.Scrollbar(root, orient="vertical",
+                                      command=self.canvas.yview)
+        self.display_frame = tk.Frame(self.canvas)
+        self.display_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+        self.canvas_window = self.canvas.create_window(
+            (0,0),
+            window=self.display_frame,
+            anchor="nw"
+        )
+        self.canvas.bind("<Configure>", self.resize_canvas)
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        self.scrollbar.pack(side="right", fill="y")
+
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
         self.refresh_display()
             
-
+    def resize_canvas(self, event):
+        self.canvas.itemconfig(self.canvas_window, width=event.width)
         
     def create_task(self):
         if len(self.subjects) != 0:
@@ -189,7 +209,7 @@ class PlannerApp:
             #Freezes main window when popup opened
             self.root.wait_window(self.create_task_window)
         else:
-            messagebox.showerror("error", "please create a subject first!")
+            messagebox.showerror("Error", "Please create a subject first!")
 
     def create_subject(self):
         self.create_subject_window = tk.Toplevel(self.root)
@@ -288,8 +308,12 @@ class PlannerApp:
                 selected_name = self.selected_subjects.get()
                 for subj in self.subjects:  
                     if subj.name == selected_name:
-                        homework = Task(subject, title, description, due_date)
+                        homework = Task(subj, title, description, due_date)
                         subj.add_task(homework)
+
+                        subj.tasks.sort(
+                            key=lambda t: datetime.strptime(t.due_date, "%d/%m/%y")
+                        )
                 self.save_data()
                 self.create_task_window.destroy()
                 messagebox.showinfo("Planeroo", "Task successfully created!")
@@ -333,75 +357,83 @@ class PlannerApp:
         self.create_subject_window.destroy()
         messagebox.showinfo("Planeroo", "Subject successfully created!")
     
-    
     def refresh_display(self):
+        self.clear_display()
+
+        for subject in self.subjects:
+            self.display_subject(subject)
+
+    
+    def clear_display(self):
         for widget in self.display_frame.winfo_children():
             widget.destroy()
 
-        for subject in self.subjects:
-            subject_frame = tk.Frame(self.display_frame, bg=subject.colour, relief="ridge", bd=2)
-            subject_frame.pack(fill="x", pady=5)
+    def display_subject(self, subject):  
+        subject_frame = tk.Frame(self.display_frame,
+                                bg=subject.colour, 
+                                relief="ridge", 
+                                bd=2
+            )
+        subject_frame.pack(fill="x", pady=5, expand=True)
 
-            scrollbar = Scrollbar(subject_frame, orient=VERTICAL, command=subject_frame.yview)
-            scrollbar.pack(side=RIGHT, fill=Y)
+        header = tk.Frame(subject_frame, bg=subject.colour)
+        header.pack(fill="x")
+        tk.Label(header, 
+                    text=subject.name, 
+                    bg=subject.colour, 
+                    font=("Arial", 12, "bold")
+            ).pack(side="left", padx=5)
+        
+        tk.Button(
+            header,
+            text="Delete Subject",
+            command=lambda s=subject: self.delete_subject(s)
+        ).pack(side="right", padx=5, pady=5)
 
-            subject_frame.configure(yscrollcommand=scrollbar.set)
-            scrollable_frame = Frame(subject_frame)
+        for task in subject.tasks:
+            self.display_task(subject_frame, subject, task)
 
-            subject_frame.create_window((0, 0), window=scrollable_frame, anchor="nw")
-            scrollable_frame.bind("<Configure>", lambda e: subject_frame.configure(scrollregion=canvas.bbox("all")))
+    def display_task(self, parent, subject, task):
+        mode = self.filter_mode.get()
+        if mode == "complete" and not task.completed:
+            return
+        if mode == "incomplete" and task.completed:
+            return
 
-            for i in range(30):
-                Label(scrollable_frame, text=f"Item {i+1}", width=20).pack(pady=5)
+        task_frame = tk.Frame(parent, bg=subject.colour)
+        task_frame.pack(fill="x", padx=20, pady=2, expand=True)
 
-            header = tk.Frame(subject_frame, bg=subject.colour)
-            header.pack(fill="x")
-            tk.Label(header, 
-                     text=subject.name, 
-                     bg=subject.colour, 
-                     font=("Arial", 12, "bold")
-                ).pack(side="left", padx=5)
-            
-            tk.Button(
-                header,
-                text="Delete Subject",
-                command=lambda s=subject: self.delete_subject(s)
-            ).pack(side="right", padx=5, pady=5)
+        top_row = tk.Frame(task_frame, bg=subject.colour)
+        top_row.pack(fill="x", expand=True)
 
-            for task in subject.tasks:
-                mode = self.filter_mode.get()
-                if mode == "complete" and not task.completed:
-                    continue
-                if mode == "incomplete" and task.completed:
-                    continue
+        top_row.columnconfigure(0, weight=1)
+        completed_var = tk.BooleanVar(value=task.completed)
 
-                task_frame = tk.Frame(subject_frame, bg=subject.colour)
-                task_frame.pack(fill="x", padx=20, pady=2)
+        check = tk.Checkbutton(
+            top_row,
+            text=f"{task.name} - {task.due_date}",
+            variable=completed_var,
+            bg=subject.colour,
+            anchor="w",
+            command = lambda t=task, v=completed_var: self.toggle_task(t,v)
+        )
+        check.grid(row=0, column=0, sticky="ew")
 
-                top_row = tk.Frame(task_frame, bg=subject.colour)
-                top_row.pack(fill="x")
+        delete = tk.Button(
+            top_row,
+            text="Delete",
+            command = lambda s=subject, t=task: self.delete_task(s,t)
+        )
+        delete.grid(row=0, column=1, padx=5)
 
-                completed_var = tk.BooleanVar(value=task.completed)
+        tk.Label(
+            task_frame,
+            text=f"- {task.description}",
+            bg=subject.colour,
+        ).pack(side="left", padx=40)
 
-                tk.Checkbutton(
-                    top_row,
-                    text=f"{task.name} - {task.due_date}",
-                    variable=completed_var,
-                    bg=subject.colour,
-                    command=lambda t=task, v=completed_var: self.toggle_task(t,v)
-                ).pack(side="left")
-
-                tk.Button(
-                    top_row,
-                    text="Delete",
-                    command = lambda s=subject, t=task: self.delete_task(s, t)
-                ).pack(side="right")
-
-                tk.Label(
-                    task_frame,
-                    text=f"- {task.description}",
-                    bg=subject.colour,
-                ).pack(side="left", padx=40)
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1 * (event.delta /120 )), "units")
 
     def toggle_task(self, task, var):
         task.completed = var.get()
@@ -443,7 +475,13 @@ class PlannerApp:
             with open("planner_data.json", "r") as file:
                 data = json.load(file)
         except FileNotFoundError:
+
             return
+        except json.JSONDecodeError:
+            messagebox.showerror(
+                "Error"
+                "The planner data file is corrupted. A new planner will be started."
+            )
         for subject_data in data["subjects"]:
             subject = Subject(
                 subject_data["name"],
@@ -453,7 +491,7 @@ class PlannerApp:
     
             for task_data in subject_data["tasks"]:
                 task = Task(
-                    subject.name,
+                    subject,
                     task_data["name"],
                     task_data["description"],
                     task_data["due_date"]
