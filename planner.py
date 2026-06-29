@@ -8,6 +8,11 @@ import json
 
 class Subject:
     """
+    Represents a school subject with a name, colour, and list of
+    tasks. Holds tasks.
+    Name: The display name of the subject.
+    Colour: The background colour the subject would have in the UI.
+    Tasks: A list containing all the tasks within this class.
     """
     def __init__(self, name, colour):
         self.name = name
@@ -15,15 +20,29 @@ class Subject:
         self.tasks = []
 
     def __str__(self):
+        '''
+        Returns the subject name as a string.
+        '''
         return self.name
     
     def add_task(self, task):
+        '''
+        Adds a task to a subject's task list.
+        '''
         self.tasks.append(task)
 
     def remove_task(self, task):
+        '''
+        Removes a task from this subject's task list.
+        '''
         self.tasks.remove(task)
 
     def convert_to_dictionary(self):
+        '''
+        Converts the subject and all tasks within the subject into a
+        dictionary so that it's readable by JSON
+        Returns a dictionary of the subject's name, colour, and tasks.
+        '''
         return {
             "name": self.name,
             "colour": self.colour,
@@ -33,6 +52,13 @@ class Subject:
 
 class Task:
     """
+    Represents a task linked to a subject.
+    Subject: The subject that this task belongs to.
+    Name: The title of the task.
+    Description: A short description of the task.
+    Due date: When this task is due in a DD/MM/YY Format.
+    Completed: Whether the task is checked or not in the GUI. Defaults
+    to uncompleted when first created.
     """
     def __init__(self, subject, name, description, due_date):
         self.subject = subject
@@ -40,9 +66,21 @@ class Task:
         self.description = description
         self.due_date = due_date
         self.completed = False
+
     def mark_complete(self):
+        '''
+        Mark's a task as completed (ticks the check box and remembers
+        it.)
+        '''
         self.completed = True
+
     def convert_to_dictionary(self):
+        '''
+        Converts the task list into a dictionary so that it is readable
+        by JSON.
+        Returns a dictionary containing the tasks name, description,
+        due ate, and completed status.
+        '''
         return {
             "name": self.name,
             "description": self.description,
@@ -52,6 +90,11 @@ class Task:
         
 class PlannerApp:
     """
+    Main TKinter GUI application for the study planner.
+    It manages the display of subjects and tasks, handles the user
+    input through dialog windows, as well as verifying the inputs,
+    and manages the saving and loading of JSON files.
+    Subjects: List of Subject Objects that are loaded
     """
     def __init__(self, root):
         self.root = root
@@ -79,7 +122,8 @@ class PlannerApp:
                                             width=12, height=2)
         self.create_subject_btn.pack(side="right", padx=5)
         
-        subject_display = tk.Frame(self.root, width=20, height=20)
+        subject_display = tk.Frame(self.root, 
+                                   width=20, height=20)
         subject_display.pack(padx=3, pady=3)
 
 
@@ -87,39 +131,43 @@ class PlannerApp:
 
         filter_frame = tk.Frame(root)
         filter_frame.pack(pady=5)
-        tk.Label(filter_frame, text="Show:").pack(side="left", padx="5")
+        tk.Label(filter_frame, 
+                 text="Show:"
+                ).pack(side="left", padx="5")
+        
         self.filter_mode = tk.StringVar(value="all")
         for label, value in [
             ("All", "all"),
             ("Complete", "complete"),
             ("Incomplete", "incomplete")
         ]:
-            tk.Radiobutton(filter_frame, text=label,
+            tk.Radiobutton(filter_frame,
+                            text=label,
                             variable=self.filter_mode,
                             value=value,
-                            command=self.refresh_display).pack(side="left")
+                            command=self.refresh_display
+                        ).pack(side="left")
             
         self.canvas = tk.Canvas(root)
-        self.scrollbar = tk.Scrollbar(root, orient="vertical",
+        self.scrollbar = tk.Scrollbar(root, 
+                                      orient="vertical",
                                       command=self.canvas.yview)
         
         self.display_frame = tk.Frame(self.canvas)
         self.display_frame.bind(
             "<Configure>",
             lambda e: self.canvas.configure(
-                scrollregion=self.canvas.bbox("all")
+                scrollregion = self.canvas.bbox("all")
             )
         )
 
         self.canvas_window = self.canvas.create_window(
-            (0,0),
-            window=self.display_frame,
-            anchor="nw"
-        )
+            (0,0), window=self.display_frame, anchor="nw")
 
         self.canvas.bind("<Configure>", self.resize_canvas)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
-        self.canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        self.canvas.pack(side="left", fill="both", expand=True, 
+                         padx=10, pady=10)
         self.scrollbar.pack(side="right", fill="y")
 
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
@@ -127,9 +175,14 @@ class PlannerApp:
         self.refresh_display()
             
     def resize_canvas(self, event):
-        self.canvas.itemconfig(self.canvas_window, width=event.width)
+        self.canvas.itemconfig(self.canvas_window,
+                               width=event.width)
         
     def create_task(self):
+        '''
+        Opens the create task dialog window, and shows an error if no
+        subjects exist yet, since a task must belong to a subject.
+        '''
         if len(self.subjects) != 0:
             self.create_task_window = tk.Toplevel(self.root)
             self.create_task_window.title("Create a Task")
@@ -144,7 +197,8 @@ class PlannerApp:
             self.create_task_window.grab_set()
 
             #Frame with all the information collection
-            input_frame = tk.Frame(self.create_task_window, width=20, height=20)
+            input_frame = tk.Frame(self.create_task_window, 
+                                   width=20, height=20)
             input_frame.pack(padx=3, pady=3)
 
 
@@ -162,12 +216,12 @@ class PlannerApp:
                                                     text="Task Title:")
             self.task_title = tk.Entry(input_frame)
             input_frame.task_title_label.grid(column=0, row=0, padx=5)
-            self.task_title.grid(column=1, row=0, padx=5,)
+            self.task_title.grid(column=1, row=0, padx=5)
             
             input_frame.task_description_label = tk.Label(input_frame,
                                                     text="Task Description:")
             self.task_description = tk.Entry(input_frame)
-            input_frame.task_description_label.grid(column=0, row=1, padx=5,)
+            input_frame.task_description_label.grid(column=0, row=1, padx=5)
             self.task_description.grid(column=1, row=1, padx=5)
 
             input_frame.task_subject_label = tk.Label(input_frame, 
@@ -191,15 +245,15 @@ class PlannerApp:
 
 
             #Frame with buttons to cancel or Continue
-            button_frame = tk.Frame(self.create_task_window, 
+            button_frame = tk.Frame(self.create_task_window,
                                     width=40, height=80)
             button_frame.submit_btn = tk.Button(button_frame, text="Add",
-                                        command = self.process_task)
+                                        command=self.process_task)
             button_frame.submit_btn.pack(side="left", padx=5)
 
-            button_frame.cancel_btn = tk.Button(button_frame, \
-                                        text="Cancel",
-                                        command = self.create_task_window.destroy)
+            button_frame.cancel_btn = tk.Button(button_frame, 
+                                                text="Cancel",
+                                    command=self.create_task_window.destroy)
             
             button_frame.cancel_btn.pack(side="right", padx=5)
             button_frame.pack(pady=10)
@@ -207,16 +261,23 @@ class PlannerApp:
             #Freezes main window when popup opened
             self.root.wait_window(self.create_task_window)
         else:
-            messagebox.showerror("Error", "Please create a subject first!")
+            messagebox.showerror("Error", 
+                                 "Please create a subject first!")
 
     def create_subject(self):
+        '''
+        Opens the create subject dialog window. Allows the user to
+        enter a subject name and choose a colour using the colour
+        picker.
+        '''
         self.create_subject_window = tk.Toplevel(self.root)
         self.create_subject_window.title("Create a Subject")
         self.create_subject_window.geometry("400x200")
 
 
         #Title Frame
-        label = tk.Label(self.create_subject_window, text="Creating a Subject")
+        label = tk.Label(self.create_subject_window, 
+                         text="Creating a Subject")
         label.pack(pady=10)
 
         # Freezes main screen
@@ -225,7 +286,8 @@ class PlannerApp:
 
 
         #Frame with all the information collection
-        input_frame = tk.Frame(self.create_subject_window, width=20, height=20)
+        input_frame = tk.Frame(self.create_subject_window,
+                                width=20, height=20)
         input_frame.pack(padx=3, pady=3)
 
 
@@ -239,21 +301,23 @@ class PlannerApp:
         input_frame.rowconfigure(2, weight=1)
         input_frame.rowconfigure(3, weight=1)
 
-        input_frame.subject_title_label = tk.Label(input_frame, \
+        input_frame.subject_title_label = tk.Label(input_frame,
                                         text="Subject Name:")
         self.subject_title = tk.Entry(input_frame)
 
         input_frame.subject_title_label.grid(column=0, row=0, padx=5)
         self.subject_title.grid(column=1, row=0, padx=5,)
         
+
         self.selected_colour = "#FFFFFF"
-
-
-        input_frame.subject_colour_label = tk.Label(input_frame, \
+        input_frame.subject_colour_label = tk.Label(input_frame,
                                                 text="Colour:")
-        self.subject_colour = tk.Button(input_frame, text="Choose Colour",
+        self.subject_colour = tk.Button(input_frame, 
+                                        text="Choose Colour",
                                         command=self.choose_colour)
-        self.colour_preview = tk.Label(input_frame, width=3, bg=self.selected_colour)
+        self.colour_preview = tk.Label(input_frame, 
+                                       width=3, 
+                                       bg=self.selected_colour)
         self.colour_preview.grid(column=2, row=3, padx=2)
 
         input_frame.subject_colour_label.grid(column=0, row=3, padx=2)
@@ -262,14 +326,16 @@ class PlannerApp:
 
 
         #Frame with buttons to cancel or Continue
-        button_frame = tk.Frame(self.create_subject_window, width=40, height=80)
-        button_frame.submit_btn = tk.Button(button_frame, text="Add",
-                                    command = self.process_subject)
+        button_frame = tk.Frame(self.create_subject_window, 
+                                width=40, height=80)
+        button_frame.submit_btn = tk.Button(button_frame,
+                                            text="Add",
+                                    command=self.process_subject)
         button_frame.submit_btn.pack(side="left", padx=5)
 
-        button_frame.cancel_btn = tk.Button(button_frame, \
-                                    text="Cancel",
-                                    command = self.create_subject_window.destroy)
+        button_frame.cancel_btn = tk.Button(button_frame,
+                                text="Cancel",
+                                command=self.create_subject_window.destroy)
         
         button_frame.cancel_btn.pack(side="right", padx=5)
         button_frame.pack(pady=10)
@@ -279,7 +345,12 @@ class PlannerApp:
         self.root.wait_window(self.create_subject_window)
 
     def choose_colour(self):
-        colour = colorchooser.askcolor(title="Choose a colour for the subject!")
+        '''
+        Opens the system's colour picker and updates the preview window.
+        If the user cancels without choosing a colour, the previously
+        selected colour is used.
+        '''
+        colour = colorchooser.askcolor(title="Choose a subject colour!")
 
         if colour[1] is not None:
             self.selected_colour = colour[1]
@@ -288,17 +359,18 @@ class PlannerApp:
 
     def process_task(self):
         '''
-        Makes sure all the data is correct and valid. 
+        Validates inputs from the task creation and creates a new task
+        if all inputs are valid.
+        Checks that all fields are filled in and the date is correct
+        before creating the task and adding it to the correct subject.
         '''
         title = self.task_title.get()
         description = self.task_description.get()
         due_date = self.task_due_date.get()
-        subject = self.selected_subjects.get()
         
-
-            
-        if len(title.strip()) == 0 or len(description.strip()) == 0:
-            messagebox.showerror("error", "Please enter into all fields!")
+        if not title.strip() or not description.strip():
+            messagebox.showerror("Error",
+                                "Please fill out all fields!")
         else:
             date_validation = self.check_date(due_date)
             if date_validation == True:
@@ -310,76 +382,99 @@ class PlannerApp:
                         subj.add_task(homework)
 
                         subj.tasks.sort(
-                            key=lambda t: datetime.strptime(t.due_date, "%d/%m/%y")
+                            key=lambda t: datetime.strptime(t.due_date,
+                                                            "%d/%m/%y")
                         )
                 self.save_data()
                 self.create_task_window.destroy()
-                messagebox.showinfo("Planeroo", "Task successfully created!")
+                messagebox.showinfo("Planeroo",
+                                    "Task successfully created!")
                 self.refresh_display()
 
-
     def check_date(self, due_date):
+        '''
+        Validates the due date string format and checks if the date is
+        real, and is not in the past. Returns a boolean where it is
+        True if the date is valid and not in the past, or False if date
+        date cannot exist or has already passed.
+        '''
         try:
             due_date = datetime.strptime(due_date, "%d/%m/%y")
         except ValueError:
-            messagebox.showerror("error", "please enter a valid date in DD/MM/YY format.")
+            messagebox.showerror("Error", 
+                            "Please enter a valid date in DD/MM/YY format.")
             return False
 
         if due_date.date() < datetime.now().date():
-            messagebox.showerror("error", "due date has already passed!")
+            messagebox.showerror("Error",
+                                 "Due date has already passed!")
             return False
         else:
             return True
 
     def process_subject(self):
         '''
-        Makes sure all the data is correct and valid. 
+        Validates task form inputs and creates a new Subject if they are
+        valid. Rejects empty names and duplicated names.
         '''
         title = self.subject_title.get()
         colour = self.selected_colour
-        
 
-        if len(title.strip()) == 0:
-            messagebox.showerror("error", "Please enter into all fields!")
+        if not title.strip():
+            messagebox.showerror("Error", 
+                                "Please fill out all fields!")
             return
         
         for subject in self.subjects:
             if subject.name.lower() == title.lower():
-                messagebox.showerror("error", "subject already exists!")
+                messagebox.showerror("Error", 
+                            f"Subject named {subject.name} already exists!")
                 return
+            
         new_subject = Subject(title, colour)
         self.subjects.append(new_subject)
         self.save_data()
         self.refresh_display()
 
         self.create_subject_window.destroy()
-        messagebox.showinfo("Planeroo", "Subject successfully created!")
+        messagebox.showinfo("Planeroo",
+                        f"Subject called {title} was successfully created!")
     
     def refresh_display(self):
+        '''
+        Clears and puts back all subjects and their asks on the display
+        frame, updating its data.
+        '''
         self.clear_display()
 
         for subject in self.subjects:
             self.display_subject(subject)
 
-    
     def clear_display(self):
+        '''
+        Removes all widgets from the display frame.
+        '''
         for widget in self.display_frame.winfo_children():
             widget.destroy()
 
-    def display_subject(self, subject):  
+    def display_subject(self, subject):
+        '''
+        Shows a subject's frame and all its tasks onto the display.
+        Takes in a subject, which it displays.
+        '''  
         subject_frame = tk.Frame(self.display_frame,
                                 bg=subject.colour, 
                                 relief="ridge", 
-                                bd=2
-            )
+                                bd=2)
         subject_frame.pack(fill="x", pady=5, expand=True)
 
-        header = tk.Frame(subject_frame, bg=subject.colour)
+        header = tk.Frame(subject_frame, 
+                        bg=subject.colour)
         header.pack(fill="x")
         tk.Label(header, 
-                    text=subject.name, 
-                    bg=subject.colour, 
-                    font=("Arial", 12, "bold")
+                text=subject.name, 
+                bg=subject.colour, 
+                font=("Arial", 12, "bold")
             ).pack(side="left", padx=5)
         
         tk.Button(
@@ -392,16 +487,23 @@ class PlannerApp:
             self.display_task(subject_frame, subject, task)
 
     def display_task(self, parent, subject, task):
+        '''
+        Chooses which tasks display, depending on the current filter.
+        It displays the selected tasks though, skips tasks that aren't
+        selected by the filter.
+        '''
         mode = self.filter_mode.get()
         if mode == "complete" and not task.completed:
             return
         if mode == "incomplete" and task.completed:
             return
 
-        task_frame = tk.Frame(parent, bg=subject.colour)
+        task_frame = tk.Frame(parent,
+                              bg=subject.colour)
         task_frame.pack(fill="x", padx=20, pady=2, expand=True)
 
-        top_row = tk.Frame(task_frame, bg=subject.colour)
+        top_row = tk.Frame(task_frame,
+                           bg=subject.colour)
         top_row.pack(fill="x", expand=True)
 
         top_row.columnconfigure(0, weight=1)
@@ -431,18 +533,27 @@ class PlannerApp:
         ).pack(side="left", padx=40)
 
     def _on_mousewheel(self, event):
+        '''
+        Scrolls on the canvas when the mouse of trackpad is used.
+        '''
         self.canvas.yview_scroll(int(-1 * (event.delta /120 )), "units")
 
     def toggle_task(self, task, var):
+        '''
+        Toggles a task's completed state then saves the updated data.
+        '''
         task.completed = var.get()
         self.save_data()
         self.refresh_display()
 
     def delete_task(self, subject, task):
+        '''
+        Asks the user for confirmation if they want to delete a task.
+        Then deletes the task.
+        '''
         confirm = messagebox.askyesno(
             "Delete Task",
-            f"Are you sure you want to delete {task.name}?"
-        )
+            f"Are you sure you want to delete {task.name}?")
 
         if confirm:
             subject.remove_task(task)
@@ -450,10 +561,14 @@ class PlannerApp:
             self.refresh_display()
     
     def delete_subject(self, subject):
+        '''
+        Asks the user for confirmation if they want to delete a subject,
+        and all the tasks within that subject.
+        '''
         confirm = messagebox.askyesno(
             "Delete Subject",
-            f"Are you sure you want to delete {subject.name} and all its tasks?"
-        )
+            f"Are you sure you want to delete {subject.name} and its tasks?")
+
         if confirm:
             self.subjects.remove(subject)
             self.save_data()
@@ -461,25 +576,38 @@ class PlannerApp:
 
     
     def save_data(self):
+        '''
+        Puts all subjects and tasks into a JSON readable format and
+        writes them into a JSON file. (planner_data.json)
+        '''
         data = {
-            "subjects": [subject.convert_to_dictionary() for subject in self.subjects]
+            "subjects": [subject.convert_to_dictionary() 
+                         for subject in self.subjects]
         }
 
         with open("planner_data.json", "w") as file:
-            json.dump(data,file, indent=4)
+            json.dump(data, file, indent=4)
 
     def load_data(self):
+        '''
+        Loads subjects and tasks from planner_data.json if the file
+        exists. If no file is present, then a new one is created, but
+        if the file is corrupted, then it informs the user and creates a
+        new file.
+        '''
         try:
             with open("planner_data.json", "r") as file:
                 data = json.load(file)
         except FileNotFoundError:
-
             return
         except json.JSONDecodeError:
             messagebox.showerror(
                 "Error"
-                "The planner data file is corrupted. A new planner will be started."
+                "The planner data file is corrupted. \
+                    A new planner will be started."
             )
+            return
+        
         for subject_data in data["subjects"]:
             subject = Subject(
                 subject_data["name"],
