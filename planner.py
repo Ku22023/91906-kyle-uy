@@ -3,6 +3,9 @@ from tkinter import messagebox, colorchooser
 from datetime import datetime
 import json
 
+FILENAME = "planner_data.json"
+DATE_FORMAT = "%d/%m/%y"
+
 class Subject:
     """
     Represents a school subject with a name, colour, and list of
@@ -57,19 +60,11 @@ class Task:
     Completed: Whether the task is checked or not in the GUI. Defaults
     to uncompleted when first created.
     """
-    def __init__(self, subject, name, description, due_date):
-        self.subject = subject
+    def __init__(self, name, description, due_date):
         self.name = name
         self.description = description
         self.due_date = due_date
         self.completed = False
-
-    def mark_complete(self):
-        '''
-        Mark's a task as completed (ticks the check box and remembers
-        it.)
-        '''
-        self.completed = True
 
     def convert_to_dictionary(self):
         '''
@@ -119,12 +114,6 @@ class PlannerApp:
                                             width=12, height=2)
         self.create_subject_btn.pack(side="right", padx=5)
         
-        subject_display = tk.Frame(self.root, 
-                                   width=20, height=20)
-        subject_display.pack(padx=3, pady=3)
-
-
-        subject_display.columnconfigure(0, weight=1)
 
         filter_frame = tk.Frame(root)
         filter_frame.pack(pady=5)
@@ -172,6 +161,10 @@ class PlannerApp:
         self.refresh_display()
             
     def resize_canvas(self, event):
+        '''
+        Resizes the inner display frame to match the canvas width when
+        the window is resized by the user.
+        '''
         self.canvas.itemconfig(self.canvas_window,
                                width=event.width)
         
@@ -185,15 +178,14 @@ class PlannerApp:
             self.create_task_window.title("Create a Task")
             self.create_task_window.geometry("400x200")
 
-            #Title Frame
             label = tk.Label(self.create_task_window, text="Creating a Task")
             label.pack(pady=10)
 
-            # Freezes main screen
+            # Freezes main screen, makes it un-interactable while a pop
+            # up window is open.
             self.create_task_window.transient(self.root)
             self.create_task_window.grab_set()
 
-            #Frame with all the information collection
             input_frame = tk.Frame(self.create_task_window, 
                                    width=20, height=20)
             input_frame.pack(padx=3, pady=3)
@@ -227,7 +219,6 @@ class PlannerApp:
             self.task_subject = tk.OptionMenu(input_frame, 
                                             self.selected_subjects, 
                                             *self.subjects)
-            self.task_subject.grid(column=1, row=2, padx=5)
 
             input_frame.task_subject_label.grid(column=0, row=2, padx=5)
             self.task_subject.grid(column=1, row=2, padx=5)
@@ -238,7 +229,6 @@ class PlannerApp:
 
             input_frame.task_due_date_label.grid(column=0, row=3, padx=5)
             self.task_due_date.grid(column=1, row=3, padx=5)
-            input_frame.pack()
 
 
             #Frame with buttons to cancel or Continue
@@ -255,7 +245,7 @@ class PlannerApp:
             button_frame.cancel_btn.pack(side="right", padx=5)
             button_frame.pack(pady=10)
 
-            #Freezes main window when popup opened
+            #Freezes main window when popup opened.
             self.root.wait_window(self.create_task_window)
         else:
             messagebox.showerror("Error", 
@@ -319,7 +309,6 @@ class PlannerApp:
 
         input_frame.subject_colour_label.grid(column=0, row=3, padx=2)
         self.subject_colour.grid(column=1, row=3, padx=2, pady=3)
-        input_frame.pack()
 
 
         #Frame with buttons to cancel or Continue
@@ -371,16 +360,26 @@ class PlannerApp:
         else:
             date_validation = self.check_date(due_date)
             if date_validation == True:
-
+                
+                # Gets the subject name that the user has selected in
+                # the drop-down menu.
                 selected_name = self.selected_subjects.get()
                 for subj in self.subjects:  
+                    # Matches selected subject name to actual Subject
+                    # object.
                     if subj.name == selected_name:
-                        homework = Task(subj, title, description, due_date)
+                        # Creates a new Task object from the user input.
+                        homework = Task(title, description, due_date)
                         subj.add_task(homework)
 
                         subj.tasks.sort(
+                            # Sorts tasks so that the earliest dates
+                            # appear first. Lambda creates a small
+                            # function that converts each task's
+                            # due_date string into a datetime object so
+                            # that python can compare them properly.
                             key=lambda t: datetime.strptime(t.due_date,
-                                                            "%d/%m/%y")
+                                                            DATE_FORMAT)
                         )
                 self.save_data()
                 self.create_task_window.destroy()
@@ -396,7 +395,7 @@ class PlannerApp:
         date cannot exist or has already passed.
         '''
         try:
-            due_date = datetime.strptime(due_date, "%d/%m/%y")
+            due_date = datetime.strptime(due_date, DATE_FORMAT)
         except ValueError:
             messagebox.showerror("Error", 
                             "Please enter a valid date in DD/MM/YY format.")
@@ -468,8 +467,11 @@ class PlannerApp:
         header = tk.Frame(subject_frame, 
                         bg=subject.colour)
         header.pack(fill="x")
+
+        task_count = len(subject.tasks)
+
         tk.Label(header, 
-                text=subject.name, 
+                text=f"{subject.name} ({task_count} tasks)", 
                 bg=subject.colour, 
                 font=("Arial", 12, "bold")
             ).pack(side="left", padx=5)
@@ -543,6 +545,7 @@ class PlannerApp:
         '''
         Toggles a task's completed state then saves the updated data.
         '''
+        # Updates the task completion state.
         task.completed = var.get()
         self.save_data()
         self.refresh_display()
@@ -552,6 +555,7 @@ class PlannerApp:
         Asks the user for confirmation if they want to delete a task.
         Then deletes the task.
         '''
+        # Asks the user for confirmation before deleting
         confirm = messagebox.askyesno(
             "Delete Task",
             f"Are you sure you want to delete {task.name}?")
@@ -586,7 +590,7 @@ class PlannerApp:
                          for subject in self.subjects]
         }
 
-        with open("planner_data.json", "w") as file:
+        with open(FILENAME, "w") as file:
             json.dump(data, file, indent=4)
 
     def load_data(self):
@@ -594,10 +598,10 @@ class PlannerApp:
         Loads subjects and tasks from planner_data.json if the file
         exists. If no file is present, then a new one is created, but
         if the file is corrupted, then it informs the user and creates a
-        new file.
+        new file.   
         '''
         try:
-            with open("planner_data.json", "r") as file:
+            with open(FILENAME, "r") as file:
                 data = json.load(file)
         except FileNotFoundError:
             messagebox.showinfo("Planeroo",
@@ -618,10 +622,11 @@ class PlannerApp:
                 subject_data["colour"],
             )
             self.subjects.append(subject)
-    
+
+            # Rebuilds Task objects and attaches them to the correct
+            # subject.
             for task_data in subject_data["tasks"]:
                 task = Task(
-                    subject,
                     task_data["name"],
                     task_data["description"],
                     task_data["due_date"]
