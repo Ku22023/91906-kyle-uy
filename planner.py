@@ -1,10 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, colorchooser
 from datetime import datetime
-
 import json
-
-
 
 class Subject:
     """
@@ -603,12 +600,14 @@ class PlannerApp:
             with open("planner_data.json", "r") as file:
                 data = json.load(file)
         except FileNotFoundError:
+            messagebox.showinfo("Planeroo",
+                                "Welcome! Create a subject to get started")
             return
         except json.JSONDecodeError:
             messagebox.showerror(
                 "Error",
-                ("The planner data file is corrupted."
-                " A new planner will be started.")
+                ("The planner data file is corrupted. "
+                "A new planner will be started.")
             )
             self.save_data()
             return
