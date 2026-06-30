@@ -536,6 +536,10 @@ class PlannerApp:
         '''
         Scrolls on the canvas when the mouse of trackpad is used.
         '''
+        first, last = self.canvas.yview()
+        if first == 0.0 and last == 1.0:
+            return
+
         self.canvas.yview_scroll(int(-1 * (event.delta /120 )), "units")
 
     def toggle_task(self, task, var):
@@ -602,10 +606,11 @@ class PlannerApp:
             return
         except json.JSONDecodeError:
             messagebox.showerror(
-                "Error"
-                "The planner data file is corrupted. \
-                    A new planner will be started."
+                "Error",
+                ("The planner data file is corrupted."
+                " A new planner will be started.")
             )
+            self.save_data()
             return
         
         for subject_data in data["subjects"]:
