@@ -53,7 +53,6 @@ class Subject:
 class Task:
     """
     Represents a task linked to a subject.
-    Subject: The subject that this task belongs to.
     Name: The title of the task.
     Description: A short description of the task.
     Due date: When this task is due in a DD/MM/YY Format.
@@ -139,8 +138,12 @@ class PlannerApp:
                                       orient="vertical",
                                       command=self.canvas.yview)
         
+        # Updates the scrollable area whenever the window changes size.
         self.display_frame = tk.Frame(self.canvas)
         self.display_frame.bind(
+            # Creates a function that runs whenever display_frame 
+            # changes size. It updates the canvas scroll region so the
+            # scrollbar knows how much content can be scrolled.
             "<Configure>",
             lambda e: self.canvas.configure(
                 scrollregion = self.canvas.bbox("all")
@@ -230,8 +233,6 @@ class PlannerApp:
             input_frame.task_due_date_label.grid(column=0, row=3, padx=5)
             self.task_due_date.grid(column=1, row=3, padx=5)
 
-
-            #Frame with buttons to cancel or Continue
             button_frame = tk.Frame(self.create_task_window,
                                     width=40, height=80)
             button_frame.submit_btn = tk.Button(button_frame, text="Add",
@@ -245,7 +246,8 @@ class PlannerApp:
             button_frame.cancel_btn.pack(side="right", padx=5)
             button_frame.pack(pady=10)
 
-            #Freezes main window when popup opened.
+            # Freezes main screen, makes it un-interactable while a pop
+            # up window is open.
             self.root.wait_window(self.create_task_window)
         else:
             messagebox.showerror("Error", 
@@ -261,22 +263,18 @@ class PlannerApp:
         self.create_subject_window.title("Create a Subject")
         self.create_subject_window.geometry("400x200")
 
-
-        #Title Frame
         label = tk.Label(self.create_subject_window, 
                          text="Creating a Subject")
         label.pack(pady=10)
 
-        # Freezes main screen
+        # Prevents the main/home window from being interactable while
+        # user is in this pop-up menu.
         self.create_subject_window.transient(self.root)
         self.create_subject_window.grab_set()
 
-
-        #Frame with all the information collection
         input_frame = tk.Frame(self.create_subject_window,
                                 width=20, height=20)
         input_frame.pack(padx=3, pady=3)
-
 
         input_frame.columnconfigure(0, weight=1)
         input_frame.columnconfigure(1, weight=1)
@@ -310,8 +308,6 @@ class PlannerApp:
         input_frame.subject_colour_label.grid(column=0, row=3, padx=2)
         self.subject_colour.grid(column=1, row=3, padx=2, pady=3)
 
-
-        #Frame with buttons to cancel or Continue
         button_frame = tk.Frame(self.create_subject_window, 
                                 width=40, height=80)
         button_frame.submit_btn = tk.Button(button_frame,
@@ -326,8 +322,8 @@ class PlannerApp:
         button_frame.cancel_btn.pack(side="right", padx=5)
         button_frame.pack(pady=10)
 
-
-        #Freezes main window when popup opened
+        # Prevents the main/home window from being interactable while
+        # user is in this pop-up menu.
         self.root.wait_window(self.create_subject_window)
 
     def choose_colour(self):
@@ -438,7 +434,7 @@ class PlannerApp:
     
     def refresh_display(self):
         '''
-        Clears and puts back all subjects and their asks on the display
+        Clears and puts back all subjects and their tasks on the display
         frame, updating its data.
         '''
         self.clear_display()
@@ -477,6 +473,10 @@ class PlannerApp:
             ).pack(side="left", padx=5)
         
         tk.Button(
+            # Creates a function that runs only when button is clicked,
+            # s=subject stores the current subject so the correct
+            # subject is passed onto delete_subject() instead of using
+            # whatever subject is in the loop.
             header,
             text="Delete Subject",
             command=lambda s=subject: self.delete_subject(s)
@@ -509,6 +509,10 @@ class PlannerApp:
         completed_var = tk.BooleanVar(value=task.completed)
 
         check = tk.Checkbutton(
+            # Lambda lets the Checkbutton call toggle_task() with the
+            # current task and Boolean Variable when clicked. t=task
+            # and v=completed_var save their current values so each
+            # taskbox updates with the correct task.
             top_row,
             text=f"{task.name} - {task.due_date}",
             variable=completed_var,
@@ -519,6 +523,9 @@ class PlannerApp:
         check.grid(row=0, column=0, sticky="ew")
 
         delete = tk.Button(
+            # Creates a function which runs when the button is clicked,
+            # saving the current subject and task so the correct task
+            # is deleted, even though the button is created in a loop.
             top_row,
             text="Delete",
             command = lambda s=subject, t=task: self.delete_task(s,t)
@@ -533,7 +540,7 @@ class PlannerApp:
 
     def _on_mousewheel(self, event):
         '''
-        Scrolls on the canvas when the mouse of trackpad is used.
+        Scrolls on the canvas when the mouse or trackpad is used.
         '''
         first, last = self.canvas.yview()
         if first == 0.0 and last == 1.0:
@@ -555,7 +562,7 @@ class PlannerApp:
         Asks the user for confirmation if they want to delete a task.
         Then deletes the task.
         '''
-        # Asks the user for confirmation before deleting
+        # Asks the user for confirmation before deleting.
         confirm = messagebox.askyesno(
             "Delete Task",
             f"Are you sure you want to delete {task.name}?")
