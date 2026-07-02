@@ -70,7 +70,7 @@ class Task:
         Converts the task list into a dictionary so that it is readable
         by JSON.
         Returns a dictionary containing the tasks name, description,
-        due ate, and completed status.
+        due date, and completed status.
         '''
         return {
             "name": self.name,
@@ -78,6 +78,7 @@ class Task:
             "due_date": self.due_date,
             "completed": self.completed
         }
+        
         
 class PlannerApp:
     """
@@ -406,8 +407,8 @@ class PlannerApp:
 
     def process_subject(self):
         '''
-        Validates task form inputs and creates a new Subject if they are
-        valid. Rejects empty names and duplicated names.
+        Validates subject form inputs and creates a new Subject if they 
+        are valid. Rejects empty names and duplicated names.
         '''
         title = self.subject_title.get()
         colour = self.selected_colour
@@ -488,7 +489,7 @@ class PlannerApp:
     def display_task(self, parent, subject, task):
         '''
         Chooses which tasks display, depending on the current filter.
-        It displays the selected tasks though, skips tasks that aren't
+        It displays the selected tasks and skips tasks that aren't
         selected by the filter.
         '''
         mode = self.filter_mode.get()
